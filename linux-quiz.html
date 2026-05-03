@@ -276,8 +276,9 @@
         <button class="cat-btn"        data-cat="users"    onclick="setCat('users',this)">Users</button>
         <button class="cat-btn"        data-cat="files"    onclick="setCat('files',this)">Files</button>
         <button class="cat-btn"        data-cat="network"  onclick="setCat('network',this)">Network</button>
-        <button class="cat-btn"        data-cat="services" onclick="setCat('services',this)">Services</button>
-        <button class="cat-btn"        data-cat="security" onclick="setCat('security',this)">Security</button>
+        <button class="cat-btn"        data-cat="services"    onclick="setCat('services',this)">Services</button>
+        <button class="cat-btn"        data-cat="security"    onclick="setCat('security',this)">Security</button>
+        <button class="cat-btn"        data-cat="permissions" onclick="setCat('permissions',this)">Permissions</button>
       </div>
 
       <div class="cat-badge" id="catBadge">Packages</div>
@@ -334,16 +335,16 @@ const QUESTIONS = [
   { cat:'users', q:'Which command displays the current logged-in username?',
     choices:['who','id','whoami','user'], correct:'whoami' },
 
-  { cat:'users', q:'What permission value does the number 4 represent?',
+  { cat:'permissions', q:'What permission value does the number 4 represent?',
     choices:['Execute','Write','Read','None'], correct:'Read' },
 
-  { cat:'users', q:'Which command makes a script executable?',
+  { cat:'permissions', q:'Which command makes a script executable?',
     choices:['chmod +x script.sh','exec script.sh','run script.sh','chmod 644 script.sh'], correct:'chmod +x script.sh' },
 
-  { cat:'users', q:'What does <code>chmod 755</code> allow?',
+  { cat:'permissions', q:'What does <code>chmod 755</code> allow?',
     choices:['Everyone can read, write, and execute','Owner can do everything; others can only read and execute','Only the owner can read and write','Nobody can access the file'], correct:'Owner can do everything; others can only read and execute' },
 
-  { cat:'users', q:'Which command changes the owner of a file to <code>bob</code>?',
+  { cat:'permissions', q:'Which command changes the owner of a file to <code>bob</code>?',
     choices:['chown bob file.txt','chmod bob file.txt','owner bob file.txt','usermod bob file.txt'], correct:'chown bob file.txt' },
 
   { cat:'users', q:'Which file do you edit to configure sudo privileges?',
@@ -576,13 +577,13 @@ const QUESTIONS = [
   { cat:'users', q:'Which command removes a user account from the system?',
     choices:['rmuser','deluser','userdel','usermod -d'], correct:'userdel' },
 
-  { cat:'users', q:'What does <code>chgrp</code> do?',
+  { cat:'permissions', q:'What does <code>chgrp</code> do?',
     choices:['Changes file permissions','Changes the group ownership of a file','Creates a new group','Lists group members'], correct:'Changes the group ownership of a file' },
 
-  { cat:'users', q:'What does the <code>-R</code> flag do when used with <code>chown</code>?',
+  { cat:'permissions', q:'What does the <code>-R</code> flag do when used with <code>chown</code>?',
     choices:['Removes the file','Applies ownership changes recursively to a directory','Reverses the change','Renames the file'], correct:'Applies ownership changes recursively to a directory' },
 
-  { cat:'users', q:'What permissions does <code>chmod 644</code> give a file?',
+  { cat:'permissions', q:'What permissions does <code>chmod 644</code> give a file?',
     choices:['Everyone can read and write','Owner can read/write; group and others can only read','Only the owner can read','Everyone has full access'], correct:'Owner can read/write; group and others can only read' },
 
   { cat:'users', q:'Which file stores encrypted user passwords on Linux?',
@@ -594,7 +595,7 @@ const QUESTIONS = [
   { cat:'users', q:'What does the <code>-aG</code> flag do in <code>usermod -aG groupname user</code>?',
     choices:['Removes the user from the group','Adds the user to the group without removing them from others','Creates a new group','Changes the user password'], correct:'Adds the user to the group without removing them from others' },
 
-  { cat:'users', q:'What does <code>chmod 700</code> allow?',
+  { cat:'permissions', q:'What does <code>chmod 700</code> allow?',
     choices:['Everyone can read the file','Only the owner can read, write, and execute','The group can read and write','Others have full access'], correct:'Only the owner can read, write, and execute' },
 
   { cat:'users', q:'Which command shows a user\'s UID, GID, and group memberships?',
@@ -950,22 +951,22 @@ const QUESTIONS = [
     choices:['Linux ignores the case and opens the file','You get an error — Linux is case-sensitive','It opens but shows garbled output','It renames the file to report.txt'], correct:'You get an error — Linux is case-sensitive' },
 
   // ── Reading permissions ──
-  { cat:'users', q:'In the permission string <code>rwxr-x---</code>, what can the owner do?',
+  { cat:'permissions', q:'In the permission string <code>rwxr-x---</code>, what can the owner do?',
     choices:['Read only','Read and write','Read, write, and execute','Nothing'], correct:'Read, write, and execute' },
 
-  { cat:'users', q:'In the permission string <code>rwxr-x---</code>, what can others (everyone outside the group) do?',
+  { cat:'permissions', q:'In the permission string <code>rwxr-x---</code>, what can others (everyone outside the group) do?',
     choices:['Read only','Read and execute','Read, write, and execute','Nothing — no permissions'], correct:'Nothing — no permissions' },
 
-  { cat:'users', q:'What does <code>rw-r--r--</code> mean for the owner?',
+  { cat:'permissions', q:'What does <code>rw-r--r--</code> mean for the owner?',
     choices:['Read, write, and execute','Read and write only','Read only','No access'], correct:'Read and write only' },
 
-  { cat:'users', q:'What does a <code>-</code> mean in a Linux permission string like <code>rw-r--r--</code>?',
+  { cat:'permissions', q:'What does a <code>-</code> mean in a Linux permission string like <code>rw-r--r--</code>?',
     choices:['The file is hidden','Root owns the file','That specific permission is not granted','The file is read-only'], correct:'That specific permission is not granted' },
 
-  { cat:'users', q:'A file has permissions <code>rwxrwxrwx</code>. Who can read, write, and execute it?',
+  { cat:'permissions', q:'A file has permissions <code>rwxrwxrwx</code>. Who can read, write, and execute it?',
     choices:['Only the owner','Owner and group','Everyone','Only root'], correct:'Everyone' },
 
-  { cat:'users', q:'In a permission string like <code>rwxr-xr--</code>, which three characters represent the group\'s permissions?',
+  { cat:'permissions', q:'In a permission string like <code>rwxr-xr--</code>, which three characters represent the group\'s permissions?',
     choices:['The first three (rwx)','The middle three (r-x)','The last three (r--)','All nine'], correct:'The middle three (r-x)' },
 
   // ── Home directories ──
@@ -1007,7 +1008,8 @@ const CAT_LABELS = {
   files:    'Files & Filesystem',
   network:  'Networking & Firewall',
   services: 'Processes & Services',
-  security: 'Security & Hardening',
+  security:    'Security & Hardening',
+  permissions: 'File Permissions',
 };
 
 const SET_SIZE = 10;
@@ -1291,8 +1293,9 @@ function resetSet() {
 buildTracker();
 nextQuestion();
 
-// Click any answered dot to review that question
+// Click any answered dot to review that question (disabled while summary is showing)
 document.getElementById('qTracker').addEventListener('click', function(e) {
+  if (document.getElementById('setSummary').style.display !== 'none') return;
   const dot = e.target.closest('.q-dot');
   if (!dot) return;
   const i = parseInt(dot.id.split('-')[1]);
