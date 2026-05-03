@@ -66,6 +66,23 @@
 
   .tracker-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #94a3b8; }
 
+  /* ── Window selector ── */
+  .window-selector { display: flex; gap: 4px; }
+  .win-btn {
+    flex: 1; padding: 4px 2px;
+    font-size: 0.65rem; font-weight: 800;
+    border: 1.5px solid #e2e8f0; border-radius: 99px;
+    background: white; color: #94a3b8;
+    cursor: pointer; transition: all 0.15s;
+  }
+  .win-btn:hover  { background: #f5f3ff; color: #5b21b6; border-color: #c4b5fd; }
+  .win-btn.active { background: #5b21b6; color: white; border-color: #5b21b6; }
+  .wrong-badge {
+    font-size: 0.6rem; font-weight: 800; color: #991b1b;
+    background: #fef2f2; border: 1px solid #fecaca;
+    border-radius: 99px; padding: 3px 10px; text-align: center;
+  }
+
   /* ── Card ── */
   .card {
     flex: 1;
@@ -214,6 +231,15 @@
     </div>
     <div class="tracker-label">Progress</div>
     <div class="q-tracker" id="qTracker"></div>
+
+    <div class="tracker-label" style="margin-top:6px;">Avoid recent</div>
+    <div class="window-selector">
+      <button class="win-btn" onclick="setWindow(10,this)">10</button>
+      <button class="win-btn active" onclick="setWindow(20,this)">20</button>
+      <button class="win-btn" onclick="setWindow(30,this)">30</button>
+      <button class="win-btn" onclick="setWindow(0,this)">Off</button>
+    </div>
+    <div class="wrong-badge" id="wrongBadge" style="display:none"></div>
   </aside>
 
   <div class="card">
@@ -757,8 +783,8 @@ const QUESTIONS = [
   { cat:'services', q:'What does <code>journalctl -f</code> do?',
     choices:['Filters logs by date','Follows the journal log in real time','Shows only error messages','Clears old log entries'], correct:'Follows the journal log in real time' },
 
-  { cat:'services', q:'Which <code>journalctl</code> flag filters logs for a specific service (e.g. <code>journalctl -u nginx</code>)?',
-    choices:['-u (unit)','-b (boot)','-e (end)','-x (extended)'], correct:'-u (unit)' },
+  { cat:'services', q:'You want to view logs for only the nginx service. Which command would you run?',
+    choices:['journalctl -u nginx','journalctl -f nginx','journalctl --service nginx','journalctl nginx'], correct:'journalctl -u nginx' },
 
   { cat:'services', q:'What does <code>systemctl is-active</code> check?',
     choices:['Whether a service is set to start at boot','Whether a service is currently running','How long a service has been running','The memory usage of a service'], correct:'Whether a service is currently running' },
@@ -894,6 +920,80 @@ const QUESTIONS = [
 
   { cat:'services', q:'What command shows both a snapshot and a real-time view of running processes?',
     choices:['jobs and ps','ps and top','top and ls','jobs and top'], correct:'ps and top' },
+
+  // ── cd .. vs cd . ──
+  { cat:'files', q:'What does <code>cd ..</code> do?',
+    choices:['Goes to the root directory','Goes to your home directory','Moves up one directory level','Stays in the current directory'], correct:'Moves up one directory level' },
+
+  { cat:'files', q:'What does <code>cd .</code> do?',
+    choices:['Moves up one directory','Goes to the root directory','Goes to your home directory','Refers to the current directory — effectively does nothing'], correct:'Refers to the current directory — effectively does nothing' },
+
+  { cat:'files', q:'You are in <code>/home/bob/documents</code>. Where does <code>cd ..</code> take you?',
+    choices:['/home','/home/bob','/','You stay in /home/bob/documents'], correct:'/home/bob' },
+
+  { cat:'files', q:'Which command takes you to your home directory from anywhere?',
+    choices:['cd /','cd home','cd ~','cd ..'], correct:'cd ~' },
+
+  // ── Case sensitivity ──
+  { cat:'files', q:'Linux filenames are...',
+    choices:['Case-insensitive — Tiger.txt and tiger.txt are the same file','Case-sensitive — Tiger.txt and tiger.txt are different files','Only lowercase','Only uppercase'], correct:'Case-sensitive — Tiger.txt and tiger.txt are different files' },
+
+  { cat:'files', q:'Which command correctly displays the contents of a file named <code>Tiger.txt</code>?',
+    choices:['cat tiger.txt','Cat Tiger.txt','cat Tiger.txt','CAT Tiger.txt'], correct:'cat Tiger.txt' },
+
+  { cat:'files', q:'You run <code>cat report.txt</code> but the file is named <code>Report.txt</code>. What happens?',
+    choices:['Linux ignores the case and opens the file','You get an error — Linux is case-sensitive','It opens but shows garbled output','It renames the file to report.txt'], correct:'You get an error — Linux is case-sensitive' },
+
+  // ── Reading permissions ──
+  { cat:'users', q:'In the permission string <code>rwxr-x---</code>, what can the owner do?',
+    choices:['Read only','Read and write','Read, write, and execute','Nothing'], correct:'Read, write, and execute' },
+
+  { cat:'users', q:'In the permission string <code>rwxr-x---</code>, what can others (everyone outside the group) do?',
+    choices:['Read only','Read and execute','Read, write, and execute','Nothing — no permissions'], correct:'Nothing — no permissions' },
+
+  { cat:'users', q:'What does <code>rw-r--r--</code> mean for the owner?',
+    choices:['Read, write, and execute','Read and write only','Read only','No access'], correct:'Read and write only' },
+
+  { cat:'users', q:'What does a <code>-</code> mean in a Linux permission string like <code>rw-r--r--</code>?',
+    choices:['The file is hidden','Root owns the file','That specific permission is not granted','The file is read-only'], correct:'That specific permission is not granted' },
+
+  { cat:'users', q:'A file has permissions <code>rwxrwxrwx</code>. Who can read, write, and execute it?',
+    choices:['Only the owner','Owner and group','Everyone','Only root'], correct:'Everyone' },
+
+  { cat:'users', q:'In a permission string like <code>rwxr-xr--</code>, which three characters represent the group\'s permissions?',
+    choices:['The first three (rwx)','The middle three (r-x)','The last three (r--)','All nine'], correct:'The middle three (r-x)' },
+
+  // ── Home directories ──
+  { cat:'files', q:'Where do regular user home directories live on Linux?',
+    choices:['/usr','/etc/home','/home','/root'], correct:'/home' },
+
+  { cat:'files', q:'If your username is <code>alice</code>, what is your home directory path?',
+    choices:['/home','/usr/alice','/home/alice','/etc/alice'], correct:'/home/alice' },
+
+  { cat:'files', q:'Which directory is the home directory for the root user?',
+    choices:['/home/root','/root','/etc/root','/usr/root'], correct:'/root' },
+
+  // ── Shell variables ──
+  { cat:'files', q:'What does <code>$USER</code> contain in the shell?',
+    choices:['The root password','The current logged-in username','The shell version','The home directory path'], correct:'The current logged-in username' },
+
+  { cat:'files', q:'What does <code>$PATH</code> tell the shell?',
+    choices:['The current directory you are in','Your home directory','The list of directories where the shell looks for commands','The name of your shell script'], correct:'The list of directories where the shell looks for commands' },
+
+  { cat:'files', q:'What does <code>$0</code> contain when running a shell script?',
+    choices:['The first argument passed to the script','The exit code of the last command','The name of the script being run','The current user\'s UID'], correct:'The name of the script being run' },
+
+  { cat:'files', q:'In a shell script, what does <code>$1</code> represent?',
+    choices:['The name of the script','The first argument passed to the script','The process ID','The exit code'], correct:'The first argument passed to the script' },
+
+  { cat:'files', q:'How do you create a shell variable called <code>CITY</code> with the value <code>Austin</code>?',
+    choices:['CITY = Austin','set CITY Austin','CITY=Austin','var CITY=Austin'], correct:'CITY=Austin' },
+
+  { cat:'files', q:'How do you print the value of a variable called <code>NAME</code>?',
+    choices:['print $NAME','echo NAME','echo $NAME','show $NAME'], correct:'echo $NAME' },
+
+  { cat:'files', q:'Why is <code>$PATH</code> important for running commands?',
+    choices:['It stores your password securely','It tells Linux where your home directory is','Without it the shell would not know where to find programs like ls or grep','It controls file permissions'], correct:'Without it the shell would not know where to find programs like ls or grep' },
 ];
 
 const CAT_LABELS = {
@@ -909,13 +1009,32 @@ const SET_SIZE = 10;
 const LETTERS  = ['A','B','C','D'];
 
 // ── State ─────────────────────────────────────────────────────────────────────
-let catMode       = 'all';
-let setHistory    = [];
-let setAnswers    = []; // [{question obj, shuffledChoices, userAnswer, correct}]
-let setQuestion   = 0;
-let currentQ      = null;
+let catMode         = 'all';
+let setHistory      = [];
+let setAnswers      = [];
+let setQuestion     = 0;
+let currentQ        = null;
 let currentShuffled = [];
-let answered      = false;
+let answered        = false;
+
+// ── Smart history ─────────────────────────────────────────────────────────────
+let recentHistory   = [];   // question texts asked recently, oldest first
+let wrongPool       = new Map(); // q.q → question obj; questions answered incorrectly
+let recentWindowSize = 20;  // how many recent questions to avoid
+
+function setWindow(n, btn) {
+  recentWindowSize = n;
+  document.querySelectorAll('.win-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function updateWrongBadge() {
+  const badge = document.getElementById('wrongBadge');
+  const count = wrongPool.size;
+  if (count === 0) { badge.style.display = 'none'; return; }
+  badge.style.display = 'block';
+  badge.textContent = count + ' to retry';
+}
 
 // ── Category toggle ───────────────────────────────────────────────────────────
 function setCat(cat, btnEl) {
@@ -967,13 +1086,38 @@ function updateTracker() {
 function nextQuestion() {
   answered = false;
   const pool = getPool();
+  const poolQs = new Set(pool.map(q => q.q));
 
-  // Pick a question not already used this set
-  const usedQs = setAnswers.map(a => a.q);
-  const available = pool.filter(q => !usedQs.includes(q.q));
-  const pick = available.length > 0
-    ? available[Math.floor(Math.random() * available.length)]
-    : pool[Math.floor(Math.random() * pool.length)];
+  // Never repeat within the current set
+  const usedThisSet = new Set(setAnswers.map(a => a.q));
+
+  // Questions seen recently (sliding window)
+  const recentWindow = recentWindowSize > 0
+    ? new Set(recentHistory.slice(-recentWindowSize))
+    : new Set();
+
+  // Priority 1 — wrong answers: in current pool, not used this set, not in recent window
+  const wrongCandidates = [...wrongPool.values()].filter(q =>
+    poolQs.has(q.q) && !usedThisSet.has(q.q) && !recentWindow.has(q.q)
+  );
+
+  // Priority 2 — fresh questions: not recently seen, not used this set
+  const freshCandidates = pool.filter(q =>
+    !usedThisSet.has(q.q) && !recentWindow.has(q.q)
+  );
+
+  // Priority 3 — fallback: anything not used this set
+  const fallback = pool.filter(q => !usedThisSet.has(q.q));
+
+  let pick;
+  if (wrongCandidates.length > 0)  pick = wrongCandidates[Math.floor(Math.random() * wrongCandidates.length)];
+  else if (freshCandidates.length > 0) pick = freshCandidates[Math.floor(Math.random() * freshCandidates.length)];
+  else if (fallback.length > 0)    pick = fallback[Math.floor(Math.random() * fallback.length)];
+  else                             pick = pool[Math.floor(Math.random() * pool.length)];
+
+  // Record in sliding history
+  recentHistory.push(pick.q);
+  if (recentHistory.length > 60) recentHistory.shift();
 
   currentQ = pick;
   currentShuffled = shuffle(pick.choices);
@@ -1010,6 +1154,14 @@ function handleAnswer(idx, btn) {
 
   const userAnswer = currentShuffled[idx];
   const isCorrect  = userAnswer === currentQ.correct;
+
+  // Update wrong pool
+  if (isCorrect) {
+    wrongPool.delete(currentQ.q);   // answered correctly — remove from retry queue
+  } else {
+    wrongPool.set(currentQ.q, currentQ); // answered wrong — queue for retry
+  }
+  updateWrongBadge();
 
   setAnswers.push({
     q:        currentQ.q,
