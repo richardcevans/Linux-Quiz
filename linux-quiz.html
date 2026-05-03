@@ -61,8 +61,10 @@
     display: flex; align-items: center; justify-content: center;
     transition: all 0.2s;
   }
-  .q-dot.answered  { background: #ede9fe; border-color: #6d28d9; color: #5b21b6; }
+  .q-dot.answered  { background: #ede9fe; border-color: #6d28d9; color: #5b21b6; cursor: pointer; }
+  .q-dot.answered:hover { background: #ddd6fe; }
   .q-dot.current   { background: #5b21b6; border-color: #5b21b6; color: white; }
+  .q-dot.reviewing { background: #f59e0b; border-color: #d97706; color: white; cursor: pointer; }
 
   .tracker-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #94a3b8; }
 
@@ -599,6 +601,9 @@ const QUESTIONS = [
     choices:['who','id','groups','finger'], correct:'id' },
 
   // ── Files & Filesystem additions ──
+  { cat:'files', q:'What is the difference between <code>find</code> and <code>grep</code>?',
+    choices:['They do the same thing','find searches for files by name or type; grep searches for text inside files','grep searches for files; find searches inside files','find is faster than grep'], correct:'find searches for files by name or type; grep searches for text inside files' },
+
   { cat:'files', q:'What does <code>grep</code> primarily do?',
     choices:['Copies files','Searches text for a matching pattern','Compresses files','Lists directory contents'], correct:'Searches text for a matching pattern' },
 
@@ -1077,56 +1082,59 @@ function updateTracker() {
     const dot = document.getElementById('dot-' + i);
     if (!dot) continue;
     dot.className = 'q-dot';
-    if (i < setQuestion)      dot.classList.add('answered');
-    else if (i === setQuestion) dot.classList.add('current');
+    if (i === reviewingIdx)        dot.classList.add('reviewing');
+    else if (i < setQuestion)      dot.classList.add('answered');
+    else if (i === setQuestion && reviewingIdx < 0) dot.classList.add('current');
   }
 }
 
-// ── Render question ───────────────────────────────────────────────────────────
-function nextQuestion() {
-  answered = false;
-  const pool = getPool();
-  const poolQs = new Set(pool.map(q => q.q));
+// ── Review mode ───────────────────────────────────────────────────────────────
+let reviewingIdx = -1; // -1 = on current question; ≥0 = reviewing a past answer
 
-  // Never repeat within the current set
-  const usedThisSet = new Set(setAnswers.map(a => a.q));
+function goToQuestion(i) {
+  if (i >= setAnswers.length) return; // can't jump to unanswered questions
+  reviewingIdx = i;
+  const entry = setAnswers[i];
 
-  // Questions seen recently (sliding window)
-  const recentWindow = recentWindowSize > 0
-    ? new Set(recentHistory.slice(-recentWindowSize))
-    : new Set();
+  document.getElementById('catBadge').textContent = CAT_LABELS[entry.cat] || entry.cat;
+  document.getElementById('questionText').innerHTML = entry.q;
+  document.getElementById('scoreQuestion').textContent = 'Reviewing ' + (i + 1);
 
-  // Priority 1 — wrong answers: in current pool, not used this set, not in recent window
-  const wrongCandidates = [...wrongPool.values()].filter(q =>
-    poolQs.has(q.q) && !usedThisSet.has(q.q) && !recentWindow.has(q.q)
-  );
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  entry.choices.forEach((text, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn' + (text === entry.user ? ' selected' : '');
+    btn.innerHTML = '<span class="letter">' + LETTERS[idx] + '</span><span>' + text + '</span>';
+    btn.addEventListener('click', () => handleReAnswer(idx, entry));
+    choicesEl.appendChild(btn);
+  });
 
-  // Priority 2 — fresh questions: not recently seen, not used this set
-  const freshCandidates = pool.filter(q =>
-    !usedThisSet.has(q.q) && !recentWindow.has(q.q)
-  );
+  updateTracker();
+}
 
-  // Priority 3 — fallback: anything not used this set
-  const fallback = pool.filter(q => !usedThisSet.has(q.q));
+function handleReAnswer(idx, entry) {
+  const newAnswer = entry.choices[idx];
+  const isCorrect = newAnswer === entry.correct;
 
-  let pick;
-  if (wrongCandidates.length > 0)  pick = wrongCandidates[Math.floor(Math.random() * wrongCandidates.length)];
-  else if (freshCandidates.length > 0) pick = freshCandidates[Math.floor(Math.random() * freshCandidates.length)];
-  else if (fallback.length > 0)    pick = fallback[Math.floor(Math.random() * fallback.length)];
-  else                             pick = pool[Math.floor(Math.random() * pool.length)];
+  entry.user = newAnswer;
+  entry.ok   = isCorrect;
 
-  // Record in sliding history
-  recentHistory.push(pick.q);
-  if (recentHistory.length > 60) recentHistory.shift();
+  if (isCorrect) wrongPool.delete(entry.q);
+  else           wrongPool.set(entry.q, { q: entry.q, cat: entry.cat, choices: entry.choices, correct: entry.correct });
+  updateWrongBadge();
 
-  currentQ = pick;
-  currentShuffled = shuffle(pick.choices);
+  // Return to the live question
+  reviewingIdx = -1;
+  renderCurrentQuestion();
+  updateTracker();
+}
 
-  // Badge + question text
-  document.getElementById('catBadge').textContent = CAT_LABELS[pick.cat] || pick.cat;
-  document.getElementById('questionText').innerHTML = pick.q;
+// ── Render current question ───────────────────────────────────────────────────
+function renderCurrentQuestion() {
+  document.getElementById('catBadge').textContent = CAT_LABELS[currentQ.cat] || currentQ.cat;
+  document.getElementById('questionText').innerHTML = currentQ.q;
 
-  // Render choices
   const choicesEl = document.getElementById('choices');
   choicesEl.innerHTML = '';
   currentShuffled.forEach((text, i) => {
@@ -1137,9 +1145,44 @@ function nextQuestion() {
     choicesEl.appendChild(btn);
   });
 
-  // Sidebar
   document.getElementById('scoreQuestion').textContent = (setQuestion + 1) + ' / ' + SET_SIZE;
   document.getElementById('progressBar').style.width = (setQuestion / SET_SIZE * 100) + '%';
+}
+
+// ── Pick & render next question ───────────────────────────────────────────────
+function nextQuestion() {
+  answered = false;
+  reviewingIdx = -1;
+  const pool = getPool();
+  const poolQs = new Set(pool.map(q => q.q));
+
+  const usedThisSet = new Set(setAnswers.map(a => a.q));
+
+  const recentWindow = recentWindowSize > 0
+    ? new Set(recentHistory.slice(-recentWindowSize))
+    : new Set();
+
+  const wrongCandidates = [...wrongPool.values()].filter(q =>
+    poolQs.has(q.q) && !usedThisSet.has(q.q) && !recentWindow.has(q.q)
+  );
+  const freshCandidates = pool.filter(q =>
+    !usedThisSet.has(q.q) && !recentWindow.has(q.q)
+  );
+  const fallback = pool.filter(q => !usedThisSet.has(q.q));
+
+  let pick;
+  if (wrongCandidates.length > 0)       pick = wrongCandidates[Math.floor(Math.random() * wrongCandidates.length)];
+  else if (freshCandidates.length > 0)  pick = freshCandidates[Math.floor(Math.random() * freshCandidates.length)];
+  else if (fallback.length > 0)         pick = fallback[Math.floor(Math.random() * fallback.length)];
+  else                                  pick = pool[Math.floor(Math.random() * pool.length)];
+
+  recentHistory.push(pick.q);
+  if (recentHistory.length > 60) recentHistory.shift();
+
+  currentQ        = pick;
+  currentShuffled = shuffle(pick.choices);
+
+  renderCurrentQuestion();
   updateTracker();
 }
 
@@ -1148,28 +1191,23 @@ function handleAnswer(idx, btn) {
   if (answered) return;
   answered = true;
 
-  // Highlight selection, disable all choices
   document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
   btn.classList.add('selected');
 
   const userAnswer = currentShuffled[idx];
   const isCorrect  = userAnswer === currentQ.correct;
 
-  // Update wrong pool
-  if (isCorrect) {
-    wrongPool.delete(currentQ.q);   // answered correctly — remove from retry queue
-  } else {
-    wrongPool.set(currentQ.q, currentQ); // answered wrong — queue for retry
-  }
+  if (isCorrect) wrongPool.delete(currentQ.q);
+  else           wrongPool.set(currentQ.q, currentQ);
   updateWrongBadge();
 
   setAnswers.push({
-    q:        currentQ.q,
-    cat:      currentQ.cat,
-    choices:  currentShuffled,
-    user:     userAnswer,
-    correct:  currentQ.correct,
-    ok:       isCorrect,
+    q:       currentQ.q,
+    cat:     currentQ.cat,
+    choices: currentShuffled,
+    user:    userAnswer,
+    correct: currentQ.correct,
+    ok:      isCorrect,
   });
 
   setQuestion++;
@@ -1252,6 +1290,14 @@ function resetSet() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildTracker();
 nextQuestion();
+
+// Click any answered dot to review that question
+document.getElementById('qTracker').addEventListener('click', function(e) {
+  const dot = e.target.closest('.q-dot');
+  if (!dot) return;
+  const i = parseInt(dot.id.split('-')[1]);
+  if (i < setAnswers.length) goToQuestion(i);
+});
 </script>
 </body>
 </html>
