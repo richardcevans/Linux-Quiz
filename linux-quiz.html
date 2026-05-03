@@ -906,6 +906,18 @@ const QUESTIONS = [
   { cat:'files', q:'What command removes an empty directory?',
     choices:['rmdir','deletedir','erase','rmfile'], correct:'rmdir' },
 
+  { cat:'files', q:'Which command deletes a directory and everything inside it?',
+    choices:['rmdir mydir','rm mydir','rm -r mydir','delete -a mydir'], correct:'rm -r mydir' },
+
+  { cat:'files', q:'You run <code>rmdir mydir</code> but get an error. What is the most likely reason?',
+    choices:['You do not have a terminal open','The directory name has a capital letter','rmdir only works on empty directories — mydir still has files in it','rmdir is not installed by default'], correct:'rmdir only works on empty directories — mydir still has files in it' },
+
+  { cat:'files', q:'What does the <code>-r</code> flag do when used with <code>rm</code>?',
+    choices:['Renames the directory','Removes files read-only','Recursively deletes a directory and all its contents','Restores a deleted file'], correct:'Recursively deletes a directory and all its contents' },
+
+  { cat:'files', q:'What is the difference between <code>rmdir</code> and <code>rm -r</code>?',
+    choices:['They do the same thing','rmdir deletes files; rm -r deletes directories','rmdir only removes empty directories; rm -r removes directories with contents','rm -r is safer than rmdir'], correct:'rmdir only removes empty directories; rm -r removes directories with contents' },
+
   { cat:'files', q:'What command copies a file?',
     choices:['cp','copy','mv','clone'], correct:'cp' },
 
