@@ -284,8 +284,8 @@ const QUESTIONS = [
   { cat:'packages', q:'What does <code>apt upgrade</code> do?',
     choices:['Updates the package index','Installs new packages','Upgrades all installed packages','Removes old packages'], correct:'Upgrades all installed packages' },
 
-  { cat:'packages', q:'Which command shows detailed information about an installed package?',
-    choices:['apt info nginx','dpkg -s nginx','apt describe nginx','pkg show nginx'], correct:'dpkg -s nginx' },
+  { cat:'packages', q:'Which command shows detailed information about an available package?',
+    choices:['apt info nginx','apt show nginx','apt describe nginx','pkg show nginx'], correct:'apt show nginx' },
 
   { cat:'packages', q:'Which command downloads a .deb file and installs it?',
     choices:['apt install file.deb','dpkg -i file.deb','deb install file.deb','pkg -i file.deb'], correct:'dpkg -i file.deb' },
@@ -312,8 +312,8 @@ const QUESTIONS = [
   { cat:'users', q:'Which command makes a script executable?',
     choices:['chmod +x script.sh','exec script.sh','run script.sh','chmod 644 script.sh'], correct:'chmod +x script.sh' },
 
-  { cat:'users', q:'What does <code>chmod 755 file.sh</code> set the permissions to?',
-    choices:['rwxr-xr-x','rwxrwxrwx','rw-r--r--','rwx------'], correct:'rwxr-xr-x' },
+  { cat:'users', q:'What does <code>chmod 755</code> allow?',
+    choices:['Everyone can read, write, and execute','Owner can do everything; others can only read and execute','Only the owner can read and write','Nobody can access the file'], correct:'Owner can do everything; others can only read and execute' },
 
   { cat:'users', q:'Which command changes the owner of a file to <code>bob</code>?',
     choices:['chown bob file.txt','chmod bob file.txt','owner bob file.txt','usermod bob file.txt'], correct:'chown bob file.txt' },
@@ -367,9 +367,6 @@ const QUESTIONS = [
 
   { cat:'network', q:'What port does SSH use by default?',
     choices:['21','80','443','22'], correct:'22' },
-
-  { cat:'network', q:'Which command connects to a remote server via SSH?',
-    choices:['ssh user@host','connect user@host','remote user@host','login user@host'], correct:'ssh user@host' },
 
   { cat:'network', q:'Which command tests network connectivity to a host?',
     choices:['trace','curl','ping','connect'], correct:'ping' },
@@ -508,12 +505,6 @@ const QUESTIONS = [
 
   { cat:'network', q:'Which Linux firewall tool is commonly used on Ubuntu?',
     choices:['firewalld','nftables','ufw','tcpdump'], correct:'ufw' },
-
-  { cat:'network', q:'Which command generates SSH key pairs?',
-    choices:['ssh-keygen','ssh-create','keymaker','genrsa'], correct:'ssh-keygen' },
-
-  { cat:'network', q:'Which file stores authorized SSH public keys for a user?',
-    choices:['~/.ssh/known_hosts','~/.ssh/config','~/.ssh/authorized_keys','/etc/ssh_keys'], correct:'~/.ssh/authorized_keys' },
 
   { cat:'network', q:'Which command copies files securely over SSH?',
     choices:['scp','ftp','mount','passwd'], correct:'scp' },
@@ -729,17 +720,11 @@ const QUESTIONS = [
   { cat:'network', q:'Which command shows your machine\'s current IP address?',
     choices:['ifconfig -a','ip addr','myip','hostname --ip'], correct:'ip addr' },
 
-  { cat:'network', q:'Which command lists all open listening ports on your machine?',
-    choices:['lsof -i','netstat -tuln','ps aux','ufw list'], correct:'netstat -tuln' },
-
   { cat:'network', q:'Which command lists all active network connections?',
     choices:['netstat -a','ip link','ping -a','ss --list'], correct:'netstat -a' },
 
   { cat:'files', q:'Which command lists all open files on a Linux system?',
     choices:['ls -a','openfiles','lsof','find / -open'], correct:'lsof' },
-
-  { cat:'services', q:'Which command shows the version of the running Linux kernel?',
-    choices:['version','uname -r','kernel --version','cat /proc/kernel'], correct:'uname -r' },
 
   { cat:'files', q:'Which command shows which Linux distribution you are running?',
     choices:['distro','cat /etc/os-release','uname -d','lsb --version'], correct:'cat /etc/os-release' },
@@ -747,11 +732,8 @@ const QUESTIONS = [
   { cat:'files', q:'Which command checks free disk space on all mounted filesystems?',
     choices:['du -sh','ls -lh','df -h','free -h'], correct:'df -h' },
 
-  { cat:'services', q:'Which command checks the CPU and memory usage of a specific process by name?',
-    choices:['ps -C processname','top --name','pgrep -l','jobs -v'], correct:'ps -C processname' },
-
-  { cat:'files', q:'How do you find out more about how a Linux command works?',
-    choices:['help commandname','info commandname','man commandname','readme commandname'], correct:'man commandname' },
+  { cat:'services', q:'Which command shows a real-time view of all processes with CPU and memory usage?',
+    choices:['ps','jobs','top','lsof'], correct:'top' },
 
   { cat:'files', q:'What does the <code>man</code> command do?',
     choices:['Manages user accounts','Opens the manual page for a command','Runs a command as another user','Shows running processes'], correct:'Opens the manual page for a command' },
@@ -775,8 +757,8 @@ const QUESTIONS = [
   { cat:'services', q:'What does <code>journalctl -f</code> do?',
     choices:['Filters logs by date','Follows the journal log in real time','Shows only error messages','Clears old log entries'], correct:'Follows the journal log in real time' },
 
-  { cat:'services', q:'Which <code>journalctl</code> flag filters logs for a specific service?',
-    choices:['-f','-b','-u','-p'], correct:'-u' },
+  { cat:'services', q:'Which <code>journalctl</code> flag filters logs for a specific service (e.g. <code>journalctl -u nginx</code>)?',
+    choices:['-u (unit)','-b (boot)','-e (end)','-x (extended)'], correct:'-u (unit)' },
 
   { cat:'services', q:'What does <code>systemctl is-active</code> check?',
     choices:['Whether a service is set to start at boot','Whether a service is currently running','How long a service has been running','The memory usage of a service'], correct:'Whether a service is currently running' },
@@ -784,8 +766,8 @@ const QUESTIONS = [
   { cat:'services', q:'What does a process in the "zombie" state mean?',
     choices:['It is actively using CPU','It has finished but has not been cleaned up yet','It is waiting for input','It is suspended'], correct:'It has finished but has not been cleaned up yet' },
 
-  { cat:'services', q:'Which command shows only the processes owned by a specific user?',
-    choices:['ps -u username','ps aux username','top username','jobs username'], correct:'ps -u username' },
+  { cat:'services', q:'Which command shows only processes owned by the user <code>bob</code>?',
+    choices:['ps -u bob','ps aux bob','top -u bob','jobs bob'], correct:'ps -u bob' },
 
   // ── BASH shell ──
   { cat:'files', q:'What does BASH stand for?',
@@ -828,15 +810,6 @@ const QUESTIONS = [
   // ── SSH / sshd ──
   { cat:'network', q:'What is <code>sshd</code>?',
     choices:['A command for copying files','The SSH server daemon that listens for incoming SSH connections','A firewall rule tool','A disk diagnostic tool'], correct:'The SSH server daemon that listens for incoming SSH connections' },
-
-  { cat:'network', q:'Which command connects to a remote server as a specific user over SSH?',
-    choices:['connect user@host','remote user@host','ssh user@host','login user@host'], correct:'ssh user@host' },
-
-  { cat:'network', q:'What does <code>ssh-keygen</code> generate?',
-    choices:['A new user account','An SSL certificate','A public/private SSH key pair','An encrypted archive'], correct:'A public/private SSH key pair' },
-
-  { cat:'network', q:'Which file on the server holds a user\'s authorized SSH public keys?',
-    choices:['/etc/ssh/keys','~/.ssh/authorized_keys','~/.ssh/id_rsa','/etc/ssh/public_keys'], correct:'~/.ssh/authorized_keys' },
 
   { cat:'network', q:'What is the main advantage of SSH key authentication over passwords?',
     choices:['It is faster to type','It does not require a username','It is more secure and not vulnerable to password guessing','It works without a network connection'], correct:'It is more secure and not vulnerable to password guessing' },
@@ -881,6 +854,46 @@ const QUESTIONS = [
 
   { cat:'services', q:'Which traditional run level means "reboot"?',
     choices:['0','1','5','6'], correct:'6' },
+
+  // ── Absolute basics ──
+  { cat:'files', q:'What command shows your current working directory?',
+    choices:['whereami','pwd','dir','ls'], correct:'pwd' },
+
+  { cat:'files', q:'What command lists files in a directory?',
+    choices:['list','show','ls','files'], correct:'ls' },
+
+  { cat:'files', q:'What command changes your current directory?',
+    choices:['mv','pwd','cd','mkdir'], correct:'cd' },
+
+  { cat:'files', q:'Which symbol represents your home directory in the shell?',
+    choices:['#','&','~','@'], correct:'~' },
+
+  { cat:'files', q:'What command removes a file?',
+    choices:['delete','erase','rm','del'], correct:'rm' },
+
+  { cat:'files', q:'What command removes an empty directory?',
+    choices:['rmdir','deletedir','erase','rmfile'], correct:'rmdir' },
+
+  { cat:'files', q:'What command copies a file?',
+    choices:['cp','copy','mv','clone'], correct:'cp' },
+
+  { cat:'files', q:'What command moves or renames a file?',
+    choices:['cp','rename','move','mv'], correct:'mv' },
+
+  { cat:'files', q:'Which command edits a text file from the terminal?',
+    choices:['nano','chrome','ls','ping'], correct:'nano' },
+
+  { cat:'files', q:'What command clears the terminal screen?',
+    choices:['reset','cls','clean','clear'], correct:'clear' },
+
+  { cat:'users', q:'What command gives you temporary administrator privileges to run a single command?',
+    choices:['admin','root','su','sudo'], correct:'sudo' },
+
+  { cat:'network', q:'What command shuts down a Linux system immediately?',
+    choices:['stop','halt','shutdown now','poweroff -now'], correct:'shutdown now' },
+
+  { cat:'services', q:'What command shows both a snapshot and a real-time view of running processes?',
+    choices:['jobs and ps','ps and top','top and ls','jobs and top'], correct:'ps and top' },
 ];
 
 const CAT_LABELS = {
