@@ -1,10 +1,18 @@
 # Linux Quiz
 
-A browser-based multiple choice quiz for ITSC 1301 and ITSC 2325 students learning Linux fundamentals. No server required — open `linux-quiz.html` directly in any browser.
+A browser-based multiple choice quiz for ITSC 1301 and ITSC 2325 students learning Linux fundamentals.
+
+## Getting started
+
+1. Click the green **Code** button on this page, then click **Download ZIP**
+2. Unzip the downloaded file
+3. Open `linux-quiz.html` in any web browser (Chrome, Firefox, Edge)
+
+That's it — no installation required.
 
 ## How to use
 
-Open `linux-quiz.html` in a browser. Answer 10 questions per set, review your results, then start the next set. Use the category buttons to focus on a specific topic.
+Answer 10 questions per set, then review your results and start the next set. Use the category buttons to focus on a specific topic. Use the **Light / Navy / Dark** buttons in the top right to switch themes.
 
 ## Question bank
 
@@ -29,6 +37,7 @@ Open `linux-quiz.html` in a browser. Answer 10 questions per set, review your re
 - Go back to any question in the current set to review or re-answer it
 - End-of-set review showing correct answers for missed questions
 - Set history table tracking score and accuracy across rounds
+- Light, Navy, and Dark themes
 
 ## Course context
 
