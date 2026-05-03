@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Linux Quiz</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #f4f2f8;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  h1 { font-size: 1.6rem; font-weight: 900; color: #1e1b4b; letter-spacing: -0.04em; margin-bottom: 2px; }
+  .subtitle { font-size: 0.8rem; color: #6d28d9; font-weight: 600; margin-bottom: 14px; }
+
+  .layout {
+    display: flex;
+    flex-direction: row;
+    gap: 14px;
+    align-items: flex-start;
+    width: 100%;
+    max-width: 820px;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 190px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    top: 16px;
+  }
+  .score-box {
+    background: white;
+    border: 1px solid #ded6f7;
+    border-radius: 1rem;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 12px rgba(76,29,149,0.06);
+  }
+  .score-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #94a3b8; }
+  .score-value { font-size: 1.3rem; font-weight: 900; color: #0f172a; }
+
+  .progress-bar-track { height: 5px; background: #ede9fe; border-radius: 99px; margin: 2px 0; }
+  .progress-bar-fill  { height: 5px; border-radius: 99px; background: #6d28d9; transition: width 0.4s ease; }
+
+  .q-tracker { display: flex; flex-wrap: wrap; gap: 5px; }
+  .q-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 2px solid #e2e8f0; background: white;
+    font-size: 0.6rem; font-weight: 800; color: #94a3b8;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .q-dot.answered  { background: #ede9fe; border-color: #6d28d9; color: #5b21b6; }
+  .q-dot.current   { background: #5b21b6; border-color: #5b21b6; color: white; }
+
+  .tracker-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #94a3b8; }
+
+  /* ── Card ── */
+  .card {
+    flex: 1;
+    background: white;
+    border: 1px solid #ded6f7;
+    border-radius: 1.5rem;
+    box-shadow: 0 14px 40px rgba(76,29,149,0.08);
+    padding: 22px;
+    min-width: 0;
+    position: relative;
+    overflow: hidden;
+  }
+  .top-bar {
+    height: 4px;
+    background: linear-gradient(to right, #5b21b6, #6d28d9, #ede9fe);
+    margin: -22px -22px 18px -22px;
+    border-radius: 1.5rem 1.5rem 0 0;
+  }
+
+  /* ── Category toggle ── */
+  .cat-toggle { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 16px; }
+  .cat-btn {
+    padding: 5px 11px;
+    font-size: 0.68rem; font-weight: 800;
+    border: 1.5px solid #ded6f7; border-radius: 99px;
+    background: white; color: #94a3b8;
+    cursor: pointer; transition: all 0.15s;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .cat-btn:hover  { background: #f5f3ff; color: #5b21b6; border-color: #c4b5fd; }
+  .cat-btn.active { background: #5b21b6; color: white; border-color: #5b21b6; }
+
+  /* ── Question ── */
+  .cat-badge {
+    font-size: 0.62rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.2em; color: #6d28d9; margin-bottom: 6px;
+  }
+  .question-text {
+    font-size: 1.05rem; font-weight: 800; color: #0f172a;
+    line-height: 1.4; margin-bottom: 18px;
+  }
+  code {
+    font-family: 'Menlo', 'Consolas', monospace;
+    background: #f1f5f9; border: 1px solid #e2e8f0;
+    border-radius: 4px; padding: 1px 6px;
+    font-size: 0.92em; color: #1e293b;
+  }
+
+  /* ── Answer choices ── */
+  .choices { display: flex; flex-direction: column; gap: 9px; }
+  .choice-btn {
+    display: flex; align-items: center; gap: 12px;
+    width: 100%; padding: 11px 16px;
+    background: white; border: 1.5px solid #e2e8f0;
+    border-radius: 0.9rem; cursor: pointer;
+    font-size: 0.88rem; font-weight: 700; color: #334155;
+    text-align: left; transition: all 0.12s;
+  }
+  .choice-btn:hover:not(:disabled) { background: #f5f3ff; border-color: #c4b5fd; color: #1e1b4b; }
+  .choice-btn .letter {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: #f1f5f9; border: 1.5px solid #e2e8f0;
+    font-size: 0.72rem; font-weight: 900; color: #64748b;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.12s;
+  }
+  .choice-btn.selected {
+    background: #ede9fe; border-color: #6d28d9; color: #1e1b4b;
+  }
+  .choice-btn.selected .letter {
+    background: #5b21b6; border-color: #5b21b6; color: white;
+  }
+  .choice-btn:disabled { cursor: default; }
+
+  /* ── End-of-set overlay ── */
+  .set-summary {
+    position: absolute; inset: 0;
+    background: white; border-radius: 1.5rem;
+    display: flex; flex-direction: column;
+    padding: 24px; gap: 14px;
+    overflow-y: auto; z-index: 20;
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .summary-header { display: flex; align-items: baseline; gap: 10px; }
+  .summary-score-num { font-size: 3rem; font-weight: 900; color: #1e1b4b; letter-spacing: -0.04em; line-height: 1; }
+  .summary-score-den { font-size: 1rem; font-weight: 700; color: #94a3b8; }
+  .summary-acc       { font-size: 1rem; font-weight: 800; color: #6d28d9; margin-left: auto; }
+
+  .review-list { display: flex; flex-direction: column; gap: 8px; }
+  .review-item {
+    border-radius: 0.9rem; padding: 10px 14px;
+    border: 1px solid;
+  }
+  .review-item.correct { background: #f0fdf4; border-color: #bbf7d0; }
+  .review-item.wrong   { background: #fef2f2; border-color: #fecaca; }
+  .review-q   { font-size: 0.78rem; font-weight: 800; color: #334155; margin-bottom: 4px; }
+  .review-q code { font-size: 0.85em; }
+  .review-ans { font-size: 0.75rem; font-weight: 700; display: flex; flex-direction: column; gap: 2px; }
+  .review-ans .you     { color: #991b1b; }
+  .review-ans .correct-ans { color: #166534; }
+  .review-ans .ok      { color: #166534; }
+
+  .history-section { border-top: 1px solid #f1f5f9; padding-top: 12px; }
+  .history-label { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.18em; color: #94a3b8; margin-bottom: 8px; }
+  .history-table { width: 100%; border-collapse: collapse; }
+  .history-table th {
+    font-size: 0.58rem; font-weight: 800; text-transform: uppercase;
+    letter-spacing: 0.14em; color: #94a3b8; text-align: left;
+    padding: 4px 6px; border-bottom: 1px solid #f1f5f9;
+  }
+  .history-table td {
+    font-size: 0.78rem; font-weight: 700; color: #334155;
+    padding: 5px 6px; border-bottom: 1px solid #f8fafc;
+  }
+  .history-table tr:last-child td { border-bottom: none; }
+  .history-table td.acc-cell { color: #6d28d9; }
+  .history-table tr.current-row td { color: #1e1b4b; font-weight: 900; }
+
+  .next-set-btn {
+    margin-top: 4px; align-self: center;
+    background: #5b21b6; color: white;
+    border: none; border-radius: 99px;
+    padding: 11px 32px; font-size: 0.88rem; font-weight: 800;
+    cursor: pointer; transition: background 0.15s, transform 0.1s;
+  }
+  .next-set-btn:hover  { background: #4c1d95; }
+  .next-set-btn:active { transform: scale(0.97); }
+</style>
+</head>
+<body>
+
+<h1>&#128039; Linux Quiz</h1>
+<p class="subtitle">Master the command line, one question at a time.</p>
+
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="score-box">
+      <div class="score-label">Question</div>
+      <div class="score-value" id="scoreQuestion">1 / 10</div>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="tracker-label">Progress</div>
+    <div class="q-tracker" id="qTracker"></div>
+  </aside>
+
+  <div class="card">
+    <div class="top-bar"></div>
+
+    <!-- End-of-set summary overlay -->
+    <div class="set-summary" id="setSummary" style="display:none">
+      <div class="summary-header">
+        <div class="summary-score-num" id="summaryScore">0</div>
+        <div class="summary-score-den">out of 10</div>
+        <div class="summary-acc" id="summaryAcc">--%</div>
+      </div>
+
+      <div class="review-list" id="reviewList"></div>
+
+      <div class="history-section">
+        <div class="history-label">Set History</div>
+        <table class="history-table">
+          <thead><tr><th>Set</th><th>Score</th><th>Accuracy</th><th>Category</th></tr></thead>
+          <tbody id="summaryHistory"></tbody>
+        </table>
+      </div>
+
+      <button class="next-set-btn" onclick="startNextSet()">Next Set &rarr;</button>
+    </div>
+
+    <!-- Quiz -->
+    <div id="quizArea">
+      <div class="cat-toggle">
+        <button class="cat-btn active" data-cat="all"      onclick="setCat('all',this)">All</button>
+        <button class="cat-btn"        data-cat="packages" onclick="setCat('packages',this)">Packages</button>
+        <button class="cat-btn"        data-cat="users"    onclick="setCat('users',this)">Users</button>
+        <button class="cat-btn"        data-cat="files"    onclick="setCat('files',this)">Files</button>
+        <button class="cat-btn"        data-cat="network"  onclick="setCat('network',this)">Network</button>
+        <button class="cat-btn"        data-cat="services" onclick="setCat('services',this)">Services</button>
+      </div>
+
+      <div class="cat-badge" id="catBadge">Packages</div>
+      <div class="question-text" id="questionText">Loading...</div>
+      <div class="choices" id="choices"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── Question bank ─────────────────────────────────────────────────────────────
+// Each question: { cat, q, choices: [4 strings], correct: 'exact string' }
+
+const QUESTIONS = [
+  // ── Packages ──
+  { cat:'packages', q:'Which command updates the local package index on Debian/Ubuntu?',
+    choices:['apt upgrade','apt update','apt install','apt refresh'], correct:'apt update' },
+
+  { cat:'packages', q:'Which command installs a package using APT?',
+    choices:['apt get nginx','apt add nginx','apt install nginx','apt fetch nginx'], correct:'apt install nginx' },
+
+  { cat:'packages', q:'Which command removes a package AND its configuration files?',
+    choices:['apt remove','apt delete','apt purge','apt uninstall'], correct:'apt purge' },
+
+  { cat:'packages', q:'Which command searches for an available package by name?',
+    choices:['apt find','apt search','apt locate','apt query'], correct:'apt search' },
+
+  { cat:'packages', q:'Which command lists all currently installed packages?',
+    choices:['apt list','dpkg -l','apt show','pkg list'], correct:'dpkg -l' },
+
+  { cat:'packages', q:'What does <code>apt upgrade</code> do?',
+    choices:['Updates the package index','Installs new packages','Upgrades all installed packages','Removes old packages'], correct:'Upgrades all installed packages' },
+
+  { cat:'packages', q:'Which command shows detailed information about an installed package?',
+    choices:['apt info nginx','dpkg -s nginx','apt describe nginx','pkg show nginx'], correct:'dpkg -s nginx' },
+
+  { cat:'packages', q:'Which command downloads a .deb file and installs it?',
+    choices:['apt install file.deb','dpkg -i file.deb','deb install file.deb','pkg -i file.deb'], correct:'dpkg -i file.deb' },
+
+  // ── Users ──
+  { cat:'users', q:'Which command adds a new user with a home directory on Debian/Ubuntu?',
+    choices:['useradd','adduser','newuser','mkuser'], correct:'adduser' },
+
+  { cat:'users', q:'Which command changes a user\'s password?',
+    choices:['chpass','usermod','passwd','setpwd'], correct:'passwd' },
+
+  { cat:'users', q:'Which command adds an existing user to a group?',
+    choices:['usermod -aG groupname username','addgroup username groupname','groupadd username','chgroup username groupname'], correct:'usermod -aG groupname username' },
+
+  { cat:'users', q:'Which file stores basic user account information?',
+    choices:['/etc/users','/etc/passwd','/etc/accounts','/etc/login'], correct:'/etc/passwd' },
+
+  { cat:'users', q:'Which command displays the current logged-in username?',
+    choices:['who','id','whoami','user'], correct:'whoami' },
+
+  { cat:'users', q:'What permission value does the number 4 represent?',
+    choices:['Execute','Write','Read','None'], correct:'Read' },
+
+  { cat:'users', q:'Which command makes a script executable?',
+    choices:['chmod +x script.sh','exec script.sh','run script.sh','chmod 644 script.sh'], correct:'chmod +x script.sh' },
+
+  { cat:'users', q:'What does <code>chmod 755 file.sh</code> set the permissions to?',
+    choices:['rwxr-xr-x','rwxrwxrwx','rw-r--r--','rwx------'], correct:'rwxr-xr-x' },
+
+  { cat:'users', q:'Which command changes the owner of a file to <code>bob</code>?',
+    choices:['chown bob file.txt','chmod bob file.txt','owner bob file.txt','usermod bob file.txt'], correct:'chown bob file.txt' },
+
+  { cat:'users', q:'Which file do you edit to configure sudo privileges?',
+    choices:['/etc/sudo','/etc/sudoers','/etc/passwd','/etc/groups'], correct:'/etc/sudoers' },
+
+  // ── Files ──
+  { cat:'files', q:'Which flag shows hidden files with <code>ls</code>?',
+    choices:['ls -h','ls -a','ls -l','ls --show'], correct:'ls -a' },
+
+  { cat:'files', q:'Which command shows disk usage of the current directory?',
+    choices:['df -h .','du -sh .','size .','diskspace .'], correct:'du -sh .' },
+
+  { cat:'files', q:'Which command shows available disk space on all mounted filesystems?',
+    choices:['du -h','df -h','free -h','mount -l'], correct:'df -h' },
+
+  { cat:'files', q:'Which command recursively finds all <code>.log</code> files under <code>/var</code>?',
+    choices:['find /var -name "*.log"','ls /var/*.log','grep -r .log /var','locate /var/*.log'], correct:'find /var -name "*.log"' },
+
+  { cat:'files', q:'Which command shows the last 20 lines of a file?',
+    choices:['head -20 file','tail -20 file','cat -20 file','less -20 file'], correct:'tail -20 file' },
+
+  { cat:'files', q:'Which command counts the number of lines in a file?',
+    choices:['count file.txt','wc -l file.txt','len file.txt','lines file.txt'], correct:'wc -l file.txt' },
+
+  { cat:'files', q:'Which command extracts a <code>.tar.gz</code> archive?',
+    choices:['tar -xvzf file.tar.gz','unzip file.tar.gz','extract file.tar.gz','tar -cvzf file.tar.gz'], correct:'tar -xvzf file.tar.gz' },
+
+  { cat:'files', q:'Which command creates a <code>.tar.gz</code> archive of a folder?',
+    choices:['tar -xvzf archive.tar.gz folder/','tar -cvzf archive.tar.gz folder/','gzip folder/','zip -r archive folder/'], correct:'tar -cvzf archive.tar.gz folder/' },
+
+  { cat:'files', q:'Which command searches for the word "error" inside a file?',
+    choices:['find "error" log.txt','grep "error" log.txt','search "error" log.txt','cat log.txt | locate error'], correct:'grep "error" log.txt' },
+
+  { cat:'files', q:'Which command is best for viewing a large file one page at a time?',
+    choices:['cat','head','less','tail'], correct:'less' },
+
+  // ── Network ──
+  { cat:'network', q:'Which command enables the UFW firewall?',
+    choices:['ufw start','ufw on','ufw enable','ufw activate'], correct:'ufw enable' },
+
+  { cat:'network', q:'Which command allows SSH traffic through UFW?',
+    choices:['ufw allow ssh','ufw open ssh','ufw permit ssh','ufw pass ssh'], correct:'ufw allow ssh' },
+
+  { cat:'network', q:'Which command shows the current UFW rules and status?',
+    choices:['ufw list','ufw show','ufw status','ufw check'], correct:'ufw status' },
+
+  { cat:'network', q:'Which command denies incoming traffic on port 80?',
+    choices:['ufw block 80','ufw deny 80','ufw reject 80','ufw drop 80'], correct:'ufw deny 80' },
+
+  { cat:'network', q:'What port does SSH use by default?',
+    choices:['21','80','443','22'], correct:'22' },
+
+  { cat:'network', q:'Which command connects to a remote server via SSH?',
+    choices:['ssh user@host','connect user@host','remote user@host','login user@host'], correct:'ssh user@host' },
+
+  { cat:'network', q:'Which command tests network connectivity to a host?',
+    choices:['trace','curl','ping','connect'], correct:'ping' },
+
+  { cat:'network', q:'Which command shows open listening network ports?',
+    choices:['netstat -tuln','ps aux','ufw status','ifconfig -a'], correct:'netstat -tuln' },
+
+  // ── Services ──
+  { cat:'services', q:'Which command starts a service using systemd?',
+    choices:['service nginx go','systemctl start nginx','start nginx','run nginx'], correct:'systemctl start nginx' },
+
+  { cat:'services', q:'Which command enables a service to start automatically on boot?',
+    choices:['systemctl enable nginx','systemctl boot nginx','systemctl autostart nginx','boot nginx'], correct:'systemctl enable nginx' },
+
+  { cat:'services', q:'Which command checks the status of a service?',
+    choices:['systemctl check nginx','service nginx info','systemctl status nginx','nginx --status'], correct:'systemctl status nginx' },
+
+  { cat:'services', q:'Which command reloads a service configuration without a full restart?',
+    choices:['systemctl refresh nginx','systemctl reload nginx','nginx reload','systemctl update nginx'], correct:'systemctl reload nginx' },
+
+  { cat:'services', q:'Which command shows all running processes?',
+    choices:['ps all','ps aux','ps list','ps run'], correct:'ps aux' },
+
+  { cat:'services', q:'Which signal does <code>kill -9</code> send to a process?',
+    choices:['SIGTERM','SIGSTOP','SIGKILL','SIGHUP'], correct:'SIGKILL' },
+
+  { cat:'services', q:'Which command kills a process by name?',
+    choices:['killname','pkill','procend','terminate'], correct:'pkill' },
+
+  { cat:'services', q:'Which command shows a live real-time view of processes and CPU/memory usage?',
+    choices:['ps','top','list','proc'], correct:'top' },
+
+  { cat:'services', q:'Which command shows the Linux kernel version?',
+    choices:['version','uname -r','kernel','sysinfo'], correct:'uname -r' },
+
+  { cat:'services', q:'Which command shows available RAM?',
+    choices:['ram -h','memory','free -h','df -h'], correct:'free -h' },
+];
+
+const CAT_LABELS = {
+  packages: 'Package Management',
+  users:    'Users & Permissions',
+  files:    'Files & Filesystem',
+  network:  'Networking & Firewall',
+  services: 'Processes & Services',
+};
+
+const SET_SIZE = 10;
+const LETTERS  = ['A','B','C','D'];
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let catMode       = 'all';
+let setHistory    = [];
+let setAnswers    = []; // [{question obj, shuffledChoices, userAnswer, correct}]
+let setQuestion   = 0;
+let currentQ      = null;
+let currentShuffled = [];
+let answered      = false;
+
+// ── Category toggle ───────────────────────────────────────────────────────────
+function setCat(cat, btnEl) {
+  catMode = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btnEl.classList.add('active');
+  resetSet();
+}
+
+// ── Pool ─────────────────────────────────────────────────────────────────────
+function getPool() {
+  if (catMode === 'all') return QUESTIONS;
+  return QUESTIONS.filter(q => q.cat === catMode);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── Build question tracker dots ───────────────────────────────────────────────
+function buildTracker() {
+  const el = document.getElementById('qTracker');
+  el.innerHTML = '';
+  for (let i = 0; i < SET_SIZE; i++) {
+    const dot = document.createElement('div');
+    dot.className = 'q-dot' + (i === 0 ? ' current' : '');
+    dot.textContent = i + 1;
+    dot.id = 'dot-' + i;
+    el.appendChild(dot);
+  }
+}
+
+function updateTracker() {
+  for (let i = 0; i < SET_SIZE; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (!dot) continue;
+    dot.className = 'q-dot';
+    if (i < setQuestion)      dot.classList.add('answered');
+    else if (i === setQuestion) dot.classList.add('current');
+  }
+}
+
+// ── Render question ───────────────────────────────────────────────────────────
+function nextQuestion() {
+  answered = false;
+  const pool = getPool();
+
+  // Pick a question not already used this set
+  const usedQs = setAnswers.map(a => a.q);
+  const available = pool.filter(q => !usedQs.includes(q.q));
+  const pick = available.length > 0
+    ? available[Math.floor(Math.random() * available.length)]
+    : pool[Math.floor(Math.random() * pool.length)];
+
+  currentQ = pick;
+  currentShuffled = shuffle(pick.choices);
+
+  // Badge + question text
+  document.getElementById('catBadge').textContent = CAT_LABELS[pick.cat] || pick.cat;
+  document.getElementById('questionText').innerHTML = pick.q;
+
+  // Render choices
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  currentShuffled.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = '<span class="letter">' + LETTERS[i] + '</span><span>' + text + '</span>';
+    btn.addEventListener('click', () => handleAnswer(i, btn));
+    choicesEl.appendChild(btn);
+  });
+
+  // Sidebar
+  document.getElementById('scoreQuestion').textContent = (setQuestion + 1) + ' / ' + SET_SIZE;
+  document.getElementById('progressBar').style.width = (setQuestion / SET_SIZE * 100) + '%';
+  updateTracker();
+}
+
+// ── Answer handler ────────────────────────────────────────────────────────────
+function handleAnswer(idx, btn) {
+  if (answered) return;
+  answered = true;
+
+  // Highlight selection, disable all choices
+  document.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+  btn.classList.add('selected');
+
+  const userAnswer = currentShuffled[idx];
+  const isCorrect  = userAnswer === currentQ.correct;
+
+  setAnswers.push({
+    q:        currentQ.q,
+    cat:      currentQ.cat,
+    choices:  currentShuffled,
+    user:     userAnswer,
+    correct:  currentQ.correct,
+    ok:       isCorrect,
+  });
+
+  setQuestion++;
+
+  if (setQuestion >= SET_SIZE) {
+    setTimeout(endOfSet, 600);
+  } else {
+    setTimeout(nextQuestion, 500);
+  }
+}
+
+// ── End of set ────────────────────────────────────────────────────────────────
+function endOfSet() {
+  const score = setAnswers.filter(a => a.ok).length;
+  const pct   = Math.round(score / SET_SIZE * 100);
+  const catLabel = catMode === 'all' ? 'All' : (CAT_LABELS[catMode] || catMode);
+  setHistory.push({ set: setHistory.length + 1, score, acc: pct, cat: catLabel });
+
+  document.getElementById('summaryScore').textContent = score;
+  document.getElementById('summaryAcc').textContent   = pct + '%';
+
+  // Build review list
+  const reviewEl = document.getElementById('reviewList');
+  reviewEl.innerHTML = '';
+  setAnswers.forEach((a, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (a.ok ? 'correct' : 'wrong');
+    let ansHtml;
+    if (a.ok) {
+      ansHtml = '<span class="ok">\u2713 ' + esc(a.user) + '</span>';
+    } else {
+      ansHtml = '<span class="you">\u2717 You said: ' + esc(a.user) + '</span>'
+              + '<span class="correct-ans">\u2713 Correct: ' + esc(a.correct) + '</span>';
+    }
+    div.innerHTML = '<div class="review-q">Q' + (i+1) + '. ' + a.q + '</div>'
+                  + '<div class="review-ans">' + ansHtml + '</div>';
+    reviewEl.appendChild(div);
+  });
+
+  // Set history table
+  const tbody = document.getElementById('summaryHistory');
+  tbody.innerHTML = '';
+  [...setHistory].reverse().slice(0, 8).forEach((h, i) => {
+    const tr = document.createElement('tr');
+    if (i === 0) tr.className = 'current-row';
+    tr.innerHTML = '<td>' + h.set + '</td><td>' + h.score + ' / ' + SET_SIZE
+                 + '</td><td class="acc-cell">' + h.acc + '%</td><td>' + h.cat + '</td>';
+    tbody.appendChild(tr);
+  });
+
+  // Sidebar final state
+  document.getElementById('scoreQuestion').textContent = SET_SIZE + ' / ' + SET_SIZE;
+  document.getElementById('progressBar').style.width = '100%';
+  for (let i = 0; i < SET_SIZE; i++) {
+    const dot = document.getElementById('dot-' + i);
+    if (dot) { dot.className = 'q-dot answered'; }
+  }
+
+  document.getElementById('setSummary').style.display = 'flex';
+}
+
+function esc(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── Start next set ────────────────────────────────────────────────────────────
+function startNextSet() {
+  document.getElementById('setSummary').style.display = 'none';
+  resetSet();
+}
+
+function resetSet() {
+  setQuestion = 0;
+  setAnswers  = [];
+  document.getElementById('setSummary').style.display = 'none';
+  buildTracker();
+  nextQuestion();
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildTracker();
+nextQuestion();
+</script>
+</body>
+</html>
