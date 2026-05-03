@@ -1012,6 +1012,38 @@ const QUESTIONS = [
 
   { cat:'files', q:'Why is <code>$PATH</code> important for running commands?',
     choices:['It stores your password securely','It tells Linux where your home directory is','Without it the shell would not know where to find programs like ls or grep','It controls file permissions'], correct:'Without it the shell would not know where to find programs like ls or grep' },
+
+  // ── Shell history & basics ──
+  { cat:'files', q:'Which command shows your previously run commands?', choices:['history','man','grep','env'], correct:'history' },
+  { cat:'files', q:'Which command finds files on the system by name?', choices:['grep','locate','find','search'], correct:'find' },
+
+  // ── Users ──
+  { cat:'users', q:'Which command switches to a different user account?', choices:['sudo','switch','su','whoami'], correct:'su' },
+  { cat:'users', q:'Which command on Ubuntu walks you through creating a new user interactively, including setting a password?', choices:['useradd','adduser','newuser','groupadd'], correct:'adduser' },
+
+  // ── Services / processes ──
+  { cat:'services', q:'Which command stops a running process by its PID?', choices:['stop','kill','terminate','close'], correct:'kill' },
+  { cat:'services', q:'Which command opens the cron job editor to schedule recurring tasks?', choices:['cronedit','crontab -e','cron -e','jobs'], correct:'crontab -e' },
+  { cat:'services', q:'Which command shows how long the system has been running?', choices:['top','time','uptime','date'], correct:'uptime' },
+  { cat:'services', q:'Which command displays full system information including kernel version, hostname, and architecture?', choices:['hostname','uname -a','kernel','sysinfo'], correct:'uname -a' },
+  { cat:'services', q:'Which command displays the current date and time?', choices:['clock','now','date','time'], correct:'date' },
+
+  // ── Shell environment ──
+  { cat:'files', q:'Which command displays all current environment variables?', choices:['export','env','vars','setenv'], correct:'env' },
+  { cat:'files', q:'Which command creates a shortcut (alias) for a longer command?', choices:['shortcut','alias','quickcmd','export'], correct:'alias' },
+  { cat:'files', q:'Which command writes output to both the terminal and a file at the same time?', choices:['cat','pipe','tee','echo'], correct:'tee' },
+  { cat:'files', q:'Which command shows the differences between two files?', choices:['compare','diff','cmp','file'], correct:'diff' },
+
+  // ── Packages ──
+  { cat:'packages', q:'Which command removes software but keeps its configuration files?', choices:['apt purge','apt erase','apt remove','apt delete'], correct:'apt remove' },
+  { cat:'packages', q:'Which command removes packages that were installed as dependencies but are no longer needed?', choices:['apt clean','apt purge','apt autoremove','apt update'], correct:'apt autoremove' },
+
+  // ── Files / filesystem ──
+  { cat:'files', q:'Which command lists storage devices and partitions on your system?', choices:['lsblk','mount','fdisk','disks'], correct:'lsblk' },
+  { cat:'files', q:'Which command efficiently synchronizes files between two directories or systems?', choices:['rsync','sync','scp','cp'], correct:'rsync' },
+  { cat:'files', q:'Which commands can download files from the web?', choices:['Only wget','Only curl','Both curl and wget','ftp'], correct:'Both curl and wget' },
+  { cat:'files', q:'Which command compresses a file using gzip?', choices:['tar','unzip','gzip','compact'], correct:'gzip' },
+  { cat:'files', q:'Which command extracts a ZIP archive?', choices:['unzip','zip','gunzip','tar'], correct:'unzip' },
 ];
 
 const CAT_LABELS = {
