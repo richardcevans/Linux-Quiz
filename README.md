@@ -8,15 +8,15 @@ Open `linux-quiz.html` in a browser. Answer 10 questions per set, review your re
 
 ## Question bank
 
-124 questions across 6 categories:
+~200 questions across 6 categories:
 
 | Category | Questions | Topics |
 |---|---|---|
+| Files & Filesystem | 74 | BASH shell, vi/vim, grep/sed/awk, piping & redirection, echo/cat/touch/mkdir, mount/umount, ext4, fdisk, /etc/ /var/ /dev/ /home/ /proc/, man pages |
+| Processes & Services | 39 | systemctl, journalctl, ps, PIDs, run levels, systemd targets, GUIs, desktop environments, rsyslog |
 | Security & Hardening | 30 | PAM, firewalls, VPNs, encryption, SSH hardening, fail2ban, least privilege |
-| Processes & Services | 24 | systemctl, journalctl, ps, PIDs, rsyslog, logging |
-| Files & Filesystem | 24 | grep, sed, awk, tail, /etc/, /var/log, /tmp, fstab, tar, find |
 | Users & Permissions | 20 | useradd, usermod, chown, chgrp, chmod, /etc/shadow, groups |
-| Networking & Firewall | 18 | SSH, scp, UFW, ping, netstat, ports |
+| Networking & Firewall | 27 | SSH, sshd, ssh-keygen, scp, UFW, ping, netstat, ip addr, ports |
 | Package Management | 8 | apt, dpkg |
 
 ## Features
@@ -28,4 +28,4 @@ Open `linux-quiz.html` in a browser. Answer 10 questions per set, review your re
 
 ## Course context
 
-Covers beginner-level Linux topics including shell basics, file management, user administration, package management, networking, services, logging, and Linux security fundamentals.
+Covers beginner-level Linux topics including the BASH shell, vi, file management, piping and redirection, user administration, package management, networking, SSH, services, logging, run levels, GUIs, and Linux security fundamentals.

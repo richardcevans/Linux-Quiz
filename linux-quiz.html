@@ -786,6 +786,101 @@ const QUESTIONS = [
 
   { cat:'services', q:'Which command shows only the processes owned by a specific user?',
     choices:['ps -u username','ps aux username','top username','jobs username'], correct:'ps -u username' },
+
+  // ── BASH shell ──
+  { cat:'files', q:'What does BASH stand for?',
+    choices:['Basic Automated Shell Handler','Bourne Again SHell','Binary Access Shell Host','Broad Application Shell'], correct:'Bourne Again SHell' },
+
+  { cat:'files', q:'What is a shell in Linux?',
+    choices:['A type of filesystem','A command-line interface that lets you interact with the operating system','A graphical desktop environment','A type of user account'], correct:'A command-line interface that lets you interact with the operating system' },
+
+  { cat:'files', q:'Which command shows which shell you are currently using?',
+    choices:['shell --version','echo $SHELL','whoami','ps shell'], correct:'echo $SHELL' },
+
+  { cat:'files', q:'What is a shell script?',
+    choices:['A compressed archive of files','A type of disk partition','A file containing a series of commands the shell can run','A network configuration file'], correct:'A file containing a series of commands the shell can run' },
+
+  { cat:'files', q:'What does <code>#!/bin/bash</code> at the top of a script tell the system?',
+    choices:['The script is read-only','Run this script using BASH','The script requires root access','This file is a configuration file'], correct:'Run this script using BASH' },
+
+  { cat:'files', q:'What does the <code>#</code> character do at the start of a line in a BASH script?',
+    choices:['Runs the line as root','Marks the line as a comment — it is not executed','Defines a variable','Ends the script'], correct:'Marks the line as a comment — it is not executed' },
+
+  // ── vi / vim ──
+  { cat:'files', q:'What is <code>vi</code>?',
+    choices:['A network monitoring tool','A text editor available on virtually all Linux systems','A file compression tool','A user management command'], correct:'A text editor available on virtually all Linux systems' },
+
+  { cat:'files', q:'What are the two main modes in <code>vi</code>?',
+    choices:['Read mode and Write mode','Safe mode and Fast mode','Command mode and Insert mode','Normal mode and Admin mode'], correct:'Command mode and Insert mode' },
+
+  { cat:'files', q:'Which key puts <code>vi</code> into Insert mode?',
+    choices:['Esc','i','x','s'], correct:'i' },
+
+  { cat:'files', q:'Which key takes you back to Command mode in <code>vi</code>?',
+    choices:['Enter','Ctrl+C','i','Esc'], correct:'Esc' },
+
+  { cat:'files', q:'How do you save and quit in <code>vi</code>?',
+    choices:[':exit',':wq',':save',':quit!'], correct:':wq' },
+
+  { cat:'files', q:'How do you quit <code>vi</code> without saving changes?',
+    choices:[':wq',':exit',':q!',':nosave'], correct:':q!' },
+
+  // ── SSH / sshd ──
+  { cat:'network', q:'What is <code>sshd</code>?',
+    choices:['A command for copying files','The SSH server daemon that listens for incoming SSH connections','A firewall rule tool','A disk diagnostic tool'], correct:'The SSH server daemon that listens for incoming SSH connections' },
+
+  { cat:'network', q:'Which command connects to a remote server as a specific user over SSH?',
+    choices:['connect user@host','remote user@host','ssh user@host','login user@host'], correct:'ssh user@host' },
+
+  { cat:'network', q:'What does <code>ssh-keygen</code> generate?',
+    choices:['A new user account','An SSL certificate','A public/private SSH key pair','An encrypted archive'], correct:'A public/private SSH key pair' },
+
+  { cat:'network', q:'Which file on the server holds a user\'s authorized SSH public keys?',
+    choices:['/etc/ssh/keys','~/.ssh/authorized_keys','~/.ssh/id_rsa','/etc/ssh/public_keys'], correct:'~/.ssh/authorized_keys' },
+
+  { cat:'network', q:'What is the main advantage of SSH key authentication over passwords?',
+    choices:['It is faster to type','It does not require a username','It is more secure and not vulnerable to password guessing','It works without a network connection'], correct:'It is more secure and not vulnerable to password guessing' },
+
+  { cat:'network', q:'Which command restarts the SSH server after a configuration change?',
+    choices:['ssh restart','systemctl restart sshd','reload ssh','sshd --restart'], correct:'systemctl restart sshd' },
+
+  // ── GUIs ──
+  { cat:'services', q:'What is a desktop environment in Linux?',
+    choices:['A command-line package manager','A graphical interface including windows, icons, and a taskbar','A type of firewall','A disk partitioning tool'], correct:'A graphical interface including windows, icons, and a taskbar' },
+
+  { cat:'services', q:'Which of the following is a popular Linux desktop environment?',
+    choices:['BASH','GNOME','iptables','systemd'], correct:'GNOME' },
+
+  { cat:'services', q:'What does a display server do in Linux?',
+    choices:['Manages disk partitions','Provides the foundation for rendering graphical windows on screen','Handles SSH connections','Schedules cron jobs'], correct:'Provides the foundation for rendering graphical windows on screen' },
+
+  { cat:'services', q:'What is the difference between a CLI and a GUI?',
+    choices:['CLI uses colors; GUI does not','CLI is text-based; GUI is graphical and mouse-driven','CLI requires root; GUI does not','There is no difference'], correct:'CLI is text-based; GUI is graphical and mouse-driven' },
+
+  // ── Run levels / systemd targets ──
+  { cat:'services', q:'What is a run level in Linux?',
+    choices:['The speed at which the CPU runs','A predefined state that determines which services are running','The number of users logged in','A disk read speed setting'], correct:'A predefined state that determines which services are running' },
+
+  { cat:'services', q:'What replaced traditional run levels on modern Linux systems?',
+    choices:['init scripts','cron jobs','systemd targets','boot flags'], correct:'systemd targets' },
+
+  { cat:'services', q:'Which systemd target boots into a multi-user text mode with no GUI?',
+    choices:['graphical.target','rescue.target','multi-user.target','single.target'], correct:'multi-user.target' },
+
+  { cat:'services', q:'Which systemd target boots into a full graphical desktop?',
+    choices:['multi-user.target','rescue.target','text.target','graphical.target'], correct:'graphical.target' },
+
+  { cat:'services', q:'Which command sets the default boot target on a systemd system?',
+    choices:['systemctl default set','init --default','systemctl set-default','bootctl --target'], correct:'systemctl set-default' },
+
+  { cat:'services', q:'Which traditional run level corresponds to single-user / maintenance mode?',
+    choices:['0','1','3','5'], correct:'1' },
+
+  { cat:'services', q:'Which traditional run level means "halt the system"?',
+    choices:['0','1','3','6'], correct:'0' },
+
+  { cat:'services', q:'Which traditional run level means "reboot"?',
+    choices:['0','1','5','6'], correct:'6' },
 ];
 
 const CAT_LABELS = {
