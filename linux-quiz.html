@@ -621,6 +621,141 @@ const QUESTIONS = [
   { cat:'files', q:'Which <code>/etc/</code> file sets the system hostname?',
     choices:['/etc/hosts','/etc/hostname','/etc/network','/etc/name'], correct:'/etc/hostname' },
 
+  // ── Piping & Redirection ──
+  { cat:'files', q:'What does the pipe operator <code>|</code> do?',
+    choices:['Saves output to a file','Sends the output of one command as input to another','Deletes a file','Runs two commands at the same time'], correct:'Sends the output of one command as input to another' },
+
+  { cat:'files', q:'What does <code>></code> do in a shell command?',
+    choices:['Appends output to a file','Reads input from a file','Redirects output to a file, overwriting it','Runs a command as root'], correct:'Redirects output to a file, overwriting it' },
+
+  { cat:'files', q:'What does <code>>></code> do in a shell command?',
+    choices:['Overwrites a file with new output','Appends output to the end of a file','Deletes the file first then writes','Redirects errors'], correct:'Appends output to the end of a file' },
+
+  { cat:'files', q:'What does <code><</code> do in a shell command?',
+    choices:['Redirects output to a file','Sends a file as input to a command','Appends output to a file','Compares two files'], correct:'Sends a file as input to a command' },
+
+  { cat:'files', q:'What does <code>2></code> redirect?',
+    choices:['Standard output','Standard input','Error messages (stderr)','Background processes'], correct:'Error messages (stderr)' },
+
+  { cat:'files', q:'What does <code>2>&1</code> do?',
+    choices:['Runs a command twice','Redirects stderr to the same place as stdout','Sends stdout to a file','Suppresses all output'], correct:'Redirects stderr to the same place as stdout' },
+
+  { cat:'files', q:'Which command searches for "failed" in a log file using a pipe?',
+    choices:['grep failed | cat syslog','cat /var/log/syslog | grep failed','grep | failed /var/log/syslog','pipe grep failed syslog'], correct:'cat /var/log/syslog | grep failed' },
+
+  { cat:'files', q:'What is the difference between <code>></code> and <code>>></code>?',
+    choices:['There is no difference','> overwrites the file; >> appends to it','> appends; >> overwrites','> is for errors; >> is for output'], correct:'> overwrites the file; >> appends to it' },
+
+  { cat:'files', q:'Which command sends all output including errors to a file called <code>out.txt</code>?',
+    choices:['ls > out.txt','ls 2> out.txt','ls > out.txt 2>&1','ls | out.txt'], correct:'ls > out.txt 2>&1' },
+
+  { cat:'files', q:'What does <code>ls | wc -l</code> do?',
+    choices:['Lists files and saves them','Counts the number of files listed by ls','Searches for files named wc','Deletes empty files'], correct:'Counts the number of files listed by ls' },
+
+  // ── echo, cat, touch, mkdir ──
+  { cat:'files', q:'What does the <code>echo</code> command do?',
+    choices:['Copies a file','Prints text to the terminal','Deletes a directory','Shows running processes'], correct:'Prints text to the terminal' },
+
+  { cat:'files', q:'What does <code>echo "Hello" > file.txt</code> do?',
+    choices:['Appends Hello to file.txt','Prints Hello and deletes file.txt','Writes Hello to file.txt, overwriting it','Searches file.txt for Hello'], correct:'Writes Hello to file.txt, overwriting it' },
+
+  { cat:'files', q:'What does <code>echo $HOME</code> print?',
+    choices:['The word HOME','The current username','The path to the current user\'s home directory','A list of environment variables'], correct:'The path to the current user\'s home directory' },
+
+  { cat:'files', q:'What does the <code>cat</code> command do?',
+    choices:['Copies a file to another location','Displays the contents of a file','Deletes a file','Compresses a file'], correct:'Displays the contents of a file' },
+
+  { cat:'files', q:'What does <code>cat file1.txt file2.txt > combined.txt</code> do?',
+    choices:['Compares the two files','Deletes both files','Combines both files into combined.txt','Prints only the differences'], correct:'Combines both files into combined.txt' },
+
+  { cat:'files', q:'What does the <code>touch</code> command do?',
+    choices:['Modifies file permissions','Creates an empty file or updates a file\'s timestamp','Moves a file','Displays file contents'], correct:'Creates an empty file or updates a file\'s timestamp' },
+
+  { cat:'files', q:'What does the <code>mkdir</code> command do?',
+    choices:['Moves a directory','Deletes a directory','Creates a new directory','Lists directory contents'], correct:'Creates a new directory' },
+
+  { cat:'files', q:'Which flag lets <code>mkdir</code> create nested directories in one command?',
+    choices:['-r','-f','-p','-v'], correct:'-p' },
+
+  // ── mount / umount ──
+  { cat:'files', q:'What does the <code>mount</code> command do?',
+    choices:['Ejects a USB drive','Attaches a filesystem to a directory so it can be accessed','Formats a disk','Shows disk space usage'], correct:'Attaches a filesystem to a directory so it can be accessed' },
+
+  { cat:'files', q:'What does <code>umount</code> do?',
+    choices:['Formats the filesystem','Safely detaches a mounted filesystem','Shows what is mounted','Increases disk space'], correct:'Safely detaches a mounted filesystem' },
+
+  { cat:'files', q:'Which directory is commonly used as a temporary mount point for external drives?',
+    choices:['/tmp','/dev','/mnt','/etc'], correct:'/mnt' },
+
+  // ── Filesystem directory explanations ──
+  { cat:'files', q:'What is the <code>/var/</code> directory used for?',
+    choices:['System configuration files','User home directories','Variable data like logs, caches, and databases','Temporary files'], correct:'Variable data like logs, caches, and databases' },
+
+  { cat:'files', q:'What is the <code>/dev/</code> directory used for?',
+    choices:['Developer source code','Device files that represent hardware','Downloaded packages','System documentation'], correct:'Device files that represent hardware' },
+
+  { cat:'files', q:'What is the <code>/home/</code> directory used for?',
+    choices:['System configuration','User personal directories','Installed programs','Kernel files'], correct:'User personal directories' },
+
+  { cat:'files', q:'What is the <code>/bin/</code> directory used for?',
+    choices:['Binary log files','Essential command binaries available to all users','User home directories','Temporary files'], correct:'Essential command binaries available to all users' },
+
+  { cat:'files', q:'What is the <code>/boot/</code> directory used for?',
+    choices:['Storing user files','Boot-related files including the Linux kernel','Network configuration','Running services'], correct:'Boot-related files including the Linux kernel' },
+
+  { cat:'files', q:'What is the <code>/proc/</code> directory used for?',
+    choices:['Storing processes as regular files','A virtual filesystem with live information about the kernel and processes','Permanent program storage','Package configuration'], correct:'A virtual filesystem with live information about the kernel and processes' },
+
+  { cat:'files', q:'What is the <code>/usr/</code> directory used for?',
+    choices:['User home directories','Temporary files','User-installed programs and utilities','System log files'], correct:'User-installed programs and utilities' },
+
+  // ── Filesystems, ext4, fdisk ──
+  { cat:'files', q:'What is ext4?',
+    choices:['A type of network protocol','A common Linux filesystem format used to organize data on a disk','A compression tool','A type of user account'], correct:'A common Linux filesystem format used to organize data on a disk' },
+
+  { cat:'files', q:'What is a filesystem?',
+    choices:['A list of running processes','The way an operating system organizes and stores files on a disk','A type of network connection','A backup tool'], correct:'The way an operating system organizes and stores files on a disk' },
+
+  { cat:'files', q:'What is <code>fdisk</code> used for?',
+    choices:['Viewing log files','Managing disk partitions','Monitoring network traffic','Creating user accounts'], correct:'Managing disk partitions' },
+
+  { cat:'files', q:'What is a disk partition?',
+    choices:['A type of file permission','A section of a disk treated as a separate storage unit','A network firewall rule','A compressed archive'], correct:'A section of a disk treated as a separate storage unit' },
+
+  { cat:'files', q:'Which command formats a partition with the ext4 filesystem?',
+    choices:['fdisk /dev/sdb1','mkfs.ext4 /dev/sdb1','mount /dev/sdb1','format /dev/sdb1'], correct:'mkfs.ext4 /dev/sdb1' },
+
+  // ── "How do I..." essentials ──
+  { cat:'network', q:'Which command shows your machine\'s current IP address?',
+    choices:['ifconfig -a','ip addr','myip','hostname --ip'], correct:'ip addr' },
+
+  { cat:'network', q:'Which command lists all open listening ports on your machine?',
+    choices:['lsof -i','netstat -tuln','ps aux','ufw list'], correct:'netstat -tuln' },
+
+  { cat:'network', q:'Which command lists all active network connections?',
+    choices:['netstat -a','ip link','ping -a','ss --list'], correct:'netstat -a' },
+
+  { cat:'files', q:'Which command lists all open files on a Linux system?',
+    choices:['ls -a','openfiles','lsof','find / -open'], correct:'lsof' },
+
+  { cat:'services', q:'Which command shows the version of the running Linux kernel?',
+    choices:['version','uname -r','kernel --version','cat /proc/kernel'], correct:'uname -r' },
+
+  { cat:'files', q:'Which command shows which Linux distribution you are running?',
+    choices:['distro','cat /etc/os-release','uname -d','lsb --version'], correct:'cat /etc/os-release' },
+
+  { cat:'files', q:'Which command checks free disk space on all mounted filesystems?',
+    choices:['du -sh','ls -lh','df -h','free -h'], correct:'df -h' },
+
+  { cat:'services', q:'Which command checks the CPU and memory usage of a specific process by name?',
+    choices:['ps -C processname','top --name','pgrep -l','jobs -v'], correct:'ps -C processname' },
+
+  { cat:'files', q:'How do you find out more about how a Linux command works?',
+    choices:['help commandname','info commandname','man commandname','readme commandname'], correct:'man commandname' },
+
+  { cat:'files', q:'What does the <code>man</code> command do?',
+    choices:['Manages user accounts','Opens the manual page for a command','Runs a command as another user','Shows running processes'], correct:'Opens the manual page for a command' },
+
   // ── Processes & Services additions ──
   { cat:'services', q:'What does <code>ps</code> display?',
     choices:['Disk usage','A snapshot of currently running processes','Network connections','Logged-in users'], correct:'A snapshot of currently running processes' },
