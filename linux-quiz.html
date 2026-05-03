@@ -249,6 +249,7 @@
         <button class="cat-btn"        data-cat="files"    onclick="setCat('files',this)">Files</button>
         <button class="cat-btn"        data-cat="network"  onclick="setCat('network',this)">Network</button>
         <button class="cat-btn"        data-cat="services" onclick="setCat('services',this)">Services</button>
+        <button class="cat-btn"        data-cat="security" onclick="setCat('security',this)">Security</button>
       </div>
 
       <div class="cat-badge" id="catBadge">Packages</div>
@@ -290,8 +291,8 @@ const QUESTIONS = [
     choices:['apt install file.deb','dpkg -i file.deb','deb install file.deb','pkg -i file.deb'], correct:'dpkg -i file.deb' },
 
   // ── Users ──
-  { cat:'users', q:'Which command adds a new user with a home directory on Debian/Ubuntu?',
-    choices:['useradd','adduser','newuser','mkuser'], correct:'adduser' },
+  { cat:'users', q:'Which command is used to add a new user on Linux?',
+    choices:['useradd','usermod','groupadd','passwd'], correct:'useradd' },
 
   { cat:'users', q:'Which command changes a user\'s password?',
     choices:['chpass','usermod','passwd','setpwd'], correct:'passwd' },
@@ -406,6 +407,250 @@ const QUESTIONS = [
 
   { cat:'services', q:'Which command shows available RAM?',
     choices:['ram -h','memory','free -h','df -h'], correct:'free -h' },
+
+  // ── Security & Hardening ──
+  { cat:'security', q:'What does PAM stand for?',
+    choices:['Protected Access Module','Pluggable Authentication Modules','Private Access Method','Password Authorization Manager'], correct:'Pluggable Authentication Modules' },
+
+  { cat:'security', q:'What is the main purpose of PAM in Linux?',
+    choices:['Managing disk space','Controlling how users authenticate','Installing software packages','Configuring the network'], correct:'Controlling how users authenticate' },
+
+  { cat:'security', q:'What does PAM allow a system administrator to customize?',
+    choices:['Screen resolution','Authentication policies','Disk partitions','CPU scheduling'], correct:'Authentication policies' },
+
+  { cat:'security', q:'What is the purpose of a firewall?',
+    choices:['Increase monitor brightness','Control network traffic','Speed up CPUs','Replace antivirus software'], correct:'Control network traffic' },
+
+  { cat:'security', q:'What does ACL stand for?',
+    choices:['Access Control List','Advanced Command Line','Authorized Connection Layer','Automated Control Logic'], correct:'Access Control List' },
+
+  { cat:'security', q:'Which firewall action silently ignores a network packet?',
+    choices:['Accept','Reject','Log','Drop'], correct:'Drop' },
+
+  { cat:'security', q:'What does VPN stand for?',
+    choices:['Virtual Private Network','Verified Packet Node','Variable Protection Network','Virtual Packet Network'], correct:'Virtual Private Network' },
+
+  { cat:'security', q:'What does TLS stand for?',
+    choices:['Transfer Layer Security','Transport Layer Security','Terminal Login System','Trusted Link Service'], correct:'Transport Layer Security' },
+
+  { cat:'security', q:'Which Linux account has full administrative access to the system?',
+    choices:['admin','sudo','root','superuser'], correct:'root' },
+
+  { cat:'security', q:'What does a stateful firewall keep track of?',
+    choices:['CPU temperature','Active network connections','User passwords','Disk partitions'], correct:'Active network connections' },
+
+  { cat:'security', q:'What is a firewall rule?',
+    choices:['A setting that controls monitor brightness','An instruction to allow or block certain network traffic','A command that restarts the system','A file that stores user passwords'], correct:'An instruction to allow or block certain network traffic' },
+
+  { cat:'security', q:'What does the <code>deny</code> rule generally do in a firewall?',
+    choices:['Allows all traffic','Blocks traffic','Restarts networking','Encrypts traffic'], correct:'Blocks traffic' },
+
+  { cat:'security', q:'What is the purpose of hashing?',
+    choices:['Compress files','Create a one-way fingerprint of data','Encrypt video','Increase RAM'], correct:'Create a one-way fingerprint of data' },
+
+  { cat:'security', q:'Which type of key pair is used in asymmetric encryption?',
+    choices:['Shared keys','Public and private keys','BIOS keys','USB keys'], correct:'Public and private keys' },
+
+  { cat:'security', q:'Which organization issues digital certificates?',
+    choices:['ISP','DHCP','Certificate Authority','FTP server'], correct:'Certificate Authority' },
+
+  { cat:'security', q:'What is a brute-force attack?',
+    choices:['Physical theft of a server','Repeated password guessing','DNS failure','Hardware overheating'], correct:'Repeated password guessing' },
+
+  { cat:'security', q:'Which tool helps block repeated failed login attempts?',
+    choices:['nano','fail2ban','top','lsblk'], correct:'fail2ban' },
+
+  { cat:'security', q:'Which of the following is a Linux command-line firewall tool?',
+    choices:['iptables','passwd','ls','top'], correct:'iptables' },
+
+  { cat:'security', q:'In firewalld, what happens to runtime firewall rules when the system reboots?',
+    choices:['They apply permanently','They are lost','They become read-only','They send an alert'], correct:'They are lost' },
+
+  { cat:'security', q:'What does "deny by default" mean in a firewall policy?',
+    choices:['All traffic is allowed unless blocked','All traffic is blocked unless explicitly allowed','The firewall is turned off','Only root can use the network'], correct:'All traffic is blocked unless explicitly allowed' },
+
+  { cat:'security', q:'What does SSH key authentication help reduce?',
+    choices:['RAM usage','Password-based attacks','Screen tearing','CPU temperature'], correct:'Password-based attacks' },
+
+  { cat:'security', q:'What does a VPN primarily do to protect your data?',
+    choices:['Speeds up the connection','Encrypts network traffic','Blocks all incoming traffic','Backs up your files'], correct:'Encrypts network traffic' },
+
+  { cat:'security', q:'What is the main purpose of IPSec?',
+    choices:['Managing user accounts','Securing network communications','Scheduling cron jobs','Monitoring disk space'], correct:'Securing network communications' },
+
+  { cat:'security', q:'What does "least privilege" mean in security?',
+    choices:['Everyone gets admin rights','Users get only the access they need','Nobody can log in','Root owns all files'], correct:'Users get only the access they need' },
+
+  { cat:'security', q:'What does iptables do in Linux?',
+    choices:['Manages user accounts','Manages firewall rules','Schedules tasks','Monitors disk space'], correct:'Manages firewall rules' },
+
+  { cat:'security', q:'What is IP forwarding used for in Linux?',
+    choices:['Routing packets between network interfaces','Encrypting files on disk','Managing user passwords','Scheduling background jobs'], correct:'Routing packets between network interfaces' },
+
+  { cat:'security', q:'What does a digital signature help verify?',
+    choices:['CPU speed','File authenticity and integrity','Internet bandwidth','Disk fragmentation'], correct:'File authenticity and integrity' },
+
+  { cat:'security', q:'Which firewall action records packet activity for review?',
+    choices:['Drop','Reject','Log','Ignore'], correct:'Log' },
+
+  { cat:'security', q:'Why should direct root login over SSH typically be disabled?',
+    choices:['It slows the network','It increases attack risk','It breaks DNS','It disables logging'], correct:'It increases attack risk' },
+
+  { cat:'security', q:'What is the purpose of encrypting data at rest?',
+    choices:['Speed up file reads','Protect stored data if the disk is stolen','Compress files automatically','Prevent users from logging in'], correct:'Protect stored data if the disk is stolen' },
+
+  // ── SSH & Firewall (network additions) ──
+  { cat:'network', q:'What command is commonly used to securely connect to a remote Linux system?',
+    choices:['telnet','ssh','ftp','ping'], correct:'ssh' },
+
+  { cat:'network', q:'Which file configures incoming SSH connections on a server?',
+    choices:['/etc/passwd','/etc/ssh/sshd_config','/etc/hosts','/etc/fstab'], correct:'/etc/ssh/sshd_config' },
+
+  { cat:'network', q:'Which Linux firewall tool is commonly used on Ubuntu?',
+    choices:['firewalld','nftables','ufw','tcpdump'], correct:'ufw' },
+
+  { cat:'network', q:'Which command generates SSH key pairs?',
+    choices:['ssh-keygen','ssh-create','keymaker','genrsa'], correct:'ssh-keygen' },
+
+  { cat:'network', q:'Which file stores authorized SSH public keys for a user?',
+    choices:['~/.ssh/known_hosts','~/.ssh/config','~/.ssh/authorized_keys','/etc/ssh_keys'], correct:'~/.ssh/authorized_keys' },
+
+  { cat:'network', q:'Which command copies files securely over SSH?',
+    choices:['scp','ftp','mount','passwd'], correct:'scp' },
+
+  { cat:'network', q:'Which protocol encrypts remote terminal sessions?',
+    choices:['HTTP','FTP','SSH','SMTP'], correct:'SSH' },
+
+  { cat:'network', q:'Which command securely transfers a public SSH key to a remote server?',
+    choices:['ssh-copy-id','keysend','netcopy','authmove'], correct:'ssh-copy-id' },
+
+  { cat:'network', q:'Which file contains standard port-to-service name mappings?',
+    choices:['/etc/services','/etc/ports','/etc/network','/etc/firewall'], correct:'/etc/services' },
+
+  { cat:'network', q:'Which port range is considered privileged on Linux?',
+    choices:['1024-65535','1-1023','2000-3000','5000-9000'], correct:'1-1023' },
+
+  // ── Logging (services additions) ──
+  { cat:'services', q:'What is the purpose of rsyslog?',
+    choices:['Manage printers','Handle system logging','Create user accounts','Configure DNS'], correct:'Handle system logging' },
+
+  { cat:'services', q:'Which command views systemd journal logs?',
+    choices:['syslog','journalctl','logview','netstat'], correct:'journalctl' },
+
+  { cat:'services', q:'Which file stores the main rsyslog configuration?',
+    choices:['/etc/rsyslog.conf','/etc/log.conf','/var/log/main','/etc/logger.conf'], correct:'/etc/rsyslog.conf' },
+
+  { cat:'services', q:'Which command creates manual log entries?',
+    choices:['logger','chmod','useradd','grep'], correct:'logger' },
+
+  { cat:'services', q:'Which service manages system journals on modern Linux systems?',
+    choices:['cron','systemd-journald','postfix','apache2'], correct:'systemd-journald' },
+
+  // ── Files addition ──
+  { cat:'files', q:'Which directory commonly stores Linux system log files?',
+    choices:['/opt/logs','/var/log','/etc/log','/tmp/logs'], correct:'/var/log' },
+
+  // ── Users & Permissions additions ──
+  { cat:'users', q:'What does <code>usermod</code> do?',
+    choices:['Creates a new user','Modifies an existing user account','Deletes a user','Changes a user password'], correct:'Modifies an existing user account' },
+
+  { cat:'users', q:'Which command removes a user account from the system?',
+    choices:['rmuser','deluser','userdel','usermod -d'], correct:'userdel' },
+
+  { cat:'users', q:'What does <code>chgrp</code> do?',
+    choices:['Changes file permissions','Changes the group ownership of a file','Creates a new group','Lists group members'], correct:'Changes the group ownership of a file' },
+
+  { cat:'users', q:'What does the <code>-R</code> flag do when used with <code>chown</code>?',
+    choices:['Removes the file','Applies ownership changes recursively to a directory','Reverses the change','Renames the file'], correct:'Applies ownership changes recursively to a directory' },
+
+  { cat:'users', q:'What permissions does <code>chmod 644</code> give a file?',
+    choices:['Everyone can read and write','Owner can read/write; group and others can only read','Only the owner can read','Everyone has full access'], correct:'Owner can read/write; group and others can only read' },
+
+  { cat:'users', q:'Which file stores encrypted user passwords on Linux?',
+    choices:['/etc/passwd','/etc/shadow','/etc/users','/etc/keys'], correct:'/etc/shadow' },
+
+  { cat:'users', q:'Which command shows which groups a user belongs to?',
+    choices:['id','whoami','groups','members'], correct:'groups' },
+
+  { cat:'users', q:'What does the <code>-aG</code> flag do in <code>usermod -aG groupname user</code>?',
+    choices:['Removes the user from the group','Adds the user to the group without removing them from others','Creates a new group','Changes the user password'], correct:'Adds the user to the group without removing them from others' },
+
+  { cat:'users', q:'What does <code>chmod 700</code> allow?',
+    choices:['Everyone can read the file','Only the owner can read, write, and execute','The group can read and write','Others have full access'], correct:'Only the owner can read, write, and execute' },
+
+  { cat:'users', q:'Which command shows a user\'s UID, GID, and group memberships?',
+    choices:['who','id','groups','finger'], correct:'id' },
+
+  // ── Files & Filesystem additions ──
+  { cat:'files', q:'What does <code>grep</code> primarily do?',
+    choices:['Copies files','Searches text for a matching pattern','Compresses files','Lists directory contents'], correct:'Searches text for a matching pattern' },
+
+  { cat:'files', q:'Which flag makes <code>grep</code> ignore uppercase and lowercase differences?',
+    choices:['-r','-v','-i','-n'], correct:'-i' },
+
+  { cat:'files', q:'Which flag makes <code>grep</code> search recursively through directories?',
+    choices:['-i','-r','-n','-l'], correct:'-r' },
+
+  { cat:'files', q:'What does <code>tail</code> display by default?',
+    choices:['The first 10 lines of a file','The entire file','The last 10 lines of a file','The file size'], correct:'The last 10 lines of a file' },
+
+  { cat:'files', q:'What does <code>tail -f</code> do?',
+    choices:['Shows the first line of a file','Deletes old log entries','Follows a file and shows new lines as they are added','Filters log entries by date'], correct:'Follows a file and shows new lines as they are added' },
+
+  { cat:'files', q:'What does <code>sed</code> primarily do?',
+    choices:['Shows disk usage','Finds and replaces text in a stream or file','Lists running processes','Manages services'], correct:'Finds and replaces text in a stream or file' },
+
+  { cat:'files', q:'What is <code>awk</code> primarily used for?',
+    choices:['Archiving files','Scheduling jobs','Processing and extracting columns from text output','Managing network connections'], correct:'Processing and extracting columns from text output' },
+
+  { cat:'files', q:'What type of files are stored in <code>/etc/</code>?',
+    choices:['User home directories','Temporary files','System configuration files','Binary executables'], correct:'System configuration files' },
+
+  { cat:'files', q:'Which <code>/etc/</code> file maps hostnames to IP addresses locally?',
+    choices:['/etc/hostname','/etc/hosts','/etc/resolv.conf','/etc/networks'], correct:'/etc/hosts' },
+
+  { cat:'files', q:'What is <code>/tmp/</code> used for?',
+    choices:['Storing permanent user files','Storing system logs','Storing temporary files that may be cleared on reboot','Storing installed packages'], correct:'Storing temporary files that may be cleared on reboot' },
+
+  { cat:'files', q:'Which <code>/etc/</code> file lists filesystems that mount automatically at boot?',
+    choices:['/etc/mounts','/etc/disks','/etc/fstab','/etc/mount.conf'], correct:'/etc/fstab' },
+
+  { cat:'files', q:'What character represents the root of the Linux filesystem?',
+    choices:['~','..','#','/'], correct:'/' },
+
+  { cat:'files', q:'Which <code>/etc/</code> file sets the system hostname?',
+    choices:['/etc/hosts','/etc/hostname','/etc/network','/etc/name'], correct:'/etc/hostname' },
+
+  // ── Processes & Services additions ──
+  { cat:'services', q:'What does <code>ps</code> display?',
+    choices:['Disk usage','A snapshot of currently running processes','Network connections','Logged-in users'], correct:'A snapshot of currently running processes' },
+
+  { cat:'services', q:'What is a PID in Linux?',
+    choices:['A type of file permission','A network port','A unique number assigned to each running process','A partition ID'], correct:'A unique number assigned to each running process' },
+
+  { cat:'services', q:'Which command stops a running service?',
+    choices:['systemctl pause nginx','systemctl stop nginx','systemctl kill nginx','systemctl end nginx'], correct:'systemctl stop nginx' },
+
+  { cat:'services', q:'Which command disables a service from starting automatically at boot?',
+    choices:['systemctl remove nginx','systemctl stop nginx','systemctl disable nginx','systemctl off nginx'], correct:'systemctl disable nginx' },
+
+  { cat:'services', q:'What does <code>systemctl restart</code> do?',
+    choices:['Updates the service','Stops and then starts the service again','Only reloads the config file','Permanently removes the service'], correct:'Stops and then starts the service again' },
+
+  { cat:'services', q:'What does <code>journalctl -f</code> do?',
+    choices:['Filters logs by date','Follows the journal log in real time','Shows only error messages','Clears old log entries'], correct:'Follows the journal log in real time' },
+
+  { cat:'services', q:'Which <code>journalctl</code> flag filters logs for a specific service?',
+    choices:['-f','-b','-u','-p'], correct:'-u' },
+
+  { cat:'services', q:'What does <code>systemctl is-active</code> check?',
+    choices:['Whether a service is set to start at boot','Whether a service is currently running','How long a service has been running','The memory usage of a service'], correct:'Whether a service is currently running' },
+
+  { cat:'services', q:'What does a process in the "zombie" state mean?',
+    choices:['It is actively using CPU','It has finished but has not been cleaned up yet','It is waiting for input','It is suspended'], correct:'It has finished but has not been cleaned up yet' },
+
+  { cat:'services', q:'Which command shows only the processes owned by a specific user?',
+    choices:['ps -u username','ps aux username','top username','jobs username'], correct:'ps -u username' },
 ];
 
 const CAT_LABELS = {
@@ -414,6 +659,7 @@ const CAT_LABELS = {
   files:    'Files & Filesystem',
   network:  'Networking & Firewall',
   services: 'Processes & Services',
+  security: 'Security & Hardening',
 };
 
 const SET_SIZE = 10;
