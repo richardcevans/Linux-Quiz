@@ -306,6 +306,34 @@
   }
   .next-set-btn:hover  { background: var(--accent-dark); }
   .next-set-btn:active { transform: scale(0.97); }
+
+  /* ── Exam picker ── */
+  .question-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+  .question-header .cat-badge { margin-bottom: 0; }
+  .star-btn {
+    background: none; border: none; cursor: pointer;
+    font-size: 1.25rem; line-height: 1; padding: 2px 4px;
+    color: var(--text-3); transition: color 0.15s, transform 0.1s;
+  }
+  .star-btn:hover   { color: #f59e0b; transform: scale(1.15); }
+  .star-btn.starred { color: #f59e0b; }
+
+  .exam-counter {
+    font-size: 0.82rem; font-weight: 900; color: var(--text-1);
+    text-align: center; padding: 2px 0;
+  }
+  .exam-counter .pick-num { color: var(--accent); font-size: 1rem; }
+
+  .export-btn {
+    width: 100%; padding: 7px 10px;
+    font-size: 0.68rem; font-weight: 800;
+    border: none; border-radius: 99px;
+    background: #f59e0b; color: white;
+    cursor: pointer; transition: background 0.15s;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .export-btn:hover:not(:disabled) { background: #d97706; }
+  .export-btn:disabled { opacity: 0.35; cursor: default; }
 </style>
 <script>try{var _t=localStorage.getItem('quiz-theme');if(_t&&_t!=='light')document.documentElement.setAttribute('data-theme',_t==='dark'?'dracula':_t);}catch(e){}</script>
 </head>
@@ -342,6 +370,10 @@
       <button class="win-btn" onclick="setWindow(0,this)">Off</button>
     </div>
     <div class="wrong-badge" id="wrongBadge" style="display:none"></div>
+
+    <div class="tracker-label" style="margin-top:6px;">Exam picks</div>
+    <div class="exam-counter" id="examCounter"><span class="pick-num">0</span> / 50</div>
+    <button class="export-btn" id="exportBtn" onclick="exportExamCSV()" disabled>⬇ Export CSV</button>
   </aside>
 
   <div class="card">
@@ -381,7 +413,10 @@
         <button class="cat-btn"        data-cat="permissions" onclick="setCat('permissions',this)">Permissions</button>
       </div>
 
-      <div class="cat-badge" id="catBadge">Packages</div>
+      <div class="question-header">
+        <div class="cat-badge" id="catBadge">Packages</div>
+        <button class="star-btn" id="starBtn" onclick="toggleStar()" title="Add to exam picks">☆</button>
+      </div>
       <div class="question-text" id="questionText">Loading...</div>
       <div class="choices" id="choices"></div>
     </div>
@@ -1257,6 +1292,7 @@ function goToQuestion(i) {
   });
 
   updateTracker();
+  updateStarBtn(entry.q);
 }
 
 function handleReAnswer(idx, entry) {
@@ -1293,6 +1329,7 @@ function renderCurrentQuestion() {
 
   document.getElementById('scoreQuestion').textContent = (setQuestion + 1) + ' / ' + SET_SIZE;
   document.getElementById('progressBar').style.width = (setQuestion / SET_SIZE * 100) + '%';
+  updateStarBtn(currentQ.q);
 }
 
 // ── Pick & render next question ───────────────────────────────────────────────
@@ -1433,6 +1470,67 @@ function resetSet() {
   nextQuestion();
 }
 
+// ── Exam picker ───────────────────────────────────────────────────────────────
+let examPicks = new Set();
+try { examPicks = new Set(JSON.parse(localStorage.getItem('exam-picks') || '[]')); } catch(e) {}
+
+function saveExamPicks() {
+  try { localStorage.setItem('exam-picks', JSON.stringify([...examPicks])); } catch(e) {}
+}
+
+function updateExamCounter() {
+  const n = examPicks.size;
+  document.getElementById('examCounter').innerHTML = '<span class="pick-num">' + n + '</span> / 50';
+  document.getElementById('exportBtn').disabled = (n === 0);
+}
+
+function updateStarBtn(qText) {
+  const btn = document.getElementById('starBtn');
+  if (!btn) return;
+  const on = examPicks.has(qText);
+  btn.textContent = on ? '★' : '☆';
+  btn.classList.toggle('starred', on);
+  btn.title = on ? 'Remove from exam picks' : 'Add to exam picks';
+}
+
+function toggleStar() {
+  const qText = reviewingIdx >= 0
+    ? (setAnswers[reviewingIdx] ? setAnswers[reviewingIdx].q : null)
+    : (currentQ ? currentQ.q : null);
+  if (!qText) return;
+  if (examPicks.has(qText)) examPicks.delete(qText);
+  else examPicks.add(qText);
+  saveExamPicks();
+  updateExamCounter();
+  updateStarBtn(qText);
+}
+
+function stripHtml(str) { return str.replace(/<[^>]+>/g, ''); }
+
+function csvCell(str) {
+  const s = stripHtml(str);
+  return (s.includes(',') || s.includes('"') || s.includes('\n'))
+    ? '"' + s.replace(/"/g, '""') + '"'
+    : s;
+}
+
+function exportExamCSV() {
+  const rows = [];
+  for (const qText of examPicks) {
+    const q = QUESTIONS.find(x => x.q === qText);
+    if (!q) continue;
+    const correctIdx = q.choices.indexOf(q.correct) + 1; // 1-based
+    rows.push(['MC', '', '1', csvCell(q.q), correctIdx, ...q.choices.map(csvCell)].join(','));
+  }
+  if (!rows.length) return;
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'linux-exam-questions.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
 // ── Theme switcher ────────────────────────────────────────────────────────────
 function setTheme(theme, btn) {
   if (theme === 'light') document.documentElement.removeAttribute('data-theme');
@@ -1445,6 +1543,7 @@ function setTheme(theme, btn) {
 // ── Init ──────────────────────────────────────────────────────────────────────
 buildTracker();
 nextQuestion();
+updateExamCounter();
 
 // Restore active theme button after DOM is ready
 (function() {
