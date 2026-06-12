@@ -61,14 +61,14 @@ An arcade game in the style of Space Invaders. Rows of enemies descend toward yo
 
 ### Scoring
 
-Points per kill depend on command difficulty tier:
+Points per kill depend on both the command's tier and your chosen difficulty (higher difficulty = higher points):
 
-| Tier | Color | Commands | Points |
-|---|---|---|---|
-| Basic | Green | ls, pwd, cd, clear, date, echo | 10 |
-| Files | Cyan | cat, cp, mv, rm, mkdir, touch, head, tail, less | 20 |
-| System | Orange | ps, top, free, df, who, whoami, kill, grep, man | 30 |
-| Advanced | Red | chmod, chown, ssh, wget, find, diff | 40 |
+| Tier | Color | Commands | Easy | Medium | Hard |
+|---|---|---|---|---|---|
+| Basic | Green | ls, pwd, cd, clear, date, echo | 10 | 15 | 20 |
+| Files | Cyan | cat, cp, mv, rm, mkdir, touch, head, tail, less | 20 | 30 | 40 |
+| System | Orange | ps, top, free, df, who, whoami, kill, grep, man | 30 | 45 | 60 |
+| Advanced | Red | chmod, chown, ssh, wget, find, diff | 40 | 60 | 80 |
 
 ### Lives and enemies
 

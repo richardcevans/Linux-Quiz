@@ -129,16 +129,16 @@
         <p style="margin-top:6px">5 waves &bull; 6 random commands per wave &bull; 30 unique commands total</p>
       </div>
       <div class="ts-tiers">
-        <span class="t1">&#9632; Basic (10 pts)</span>
-        <span class="t2">&#9632; Files (20 pts)</span>
-        <span class="t3">&#9632; System (30 pts)</span>
-        <span class="t4">&#9632; Advanced (40 pts)</span>
+        <span class="t1">&#9632; Basic</span>
+        <span class="t2">&#9632; Files</span>
+        <span class="t3">&#9632; System</span>
+        <span class="t4">&#9632; Advanced</span>
       </div>
       <div class="ts-diff">
         <span class="ts-diff-label">SELECT DIFFICULTY:</span>
-        <button class="diff-btn" id="btn-easy">EASY</button>
-        <button class="diff-btn" id="btn-medium">MEDIUM</button>
-        <button class="diff-btn" id="btn-hard">HARD</button>
+        <button class="diff-btn" id="btn-easy">EASY<br><span style="font-size:10px;font-weight:normal;letter-spacing:0">10/20/30/40 pts</span></button>
+        <button class="diff-btn" id="btn-medium">MEDIUM<br><span style="font-size:10px;font-weight:normal;letter-spacing:0">15/30/45/60 pts</span></button>
+        <button class="diff-btn" id="btn-hard">HARD<br><span style="font-size:10px;font-weight:normal;letter-spacing:0">20/40/60/80 pts</span></button>
       </div>
       <div class="ts-scores">
         <div class="ts-score-hdr">&#9660; HIGH SCORES &#9660;</div>
@@ -203,9 +203,9 @@ const POOL = [
 
 // ── Difficulty ────────────────────────────────────────────────────────────────
 const DIFF = {
-  easy:   {baseSpeed:5,  speedInc:2,  killBoost:0.4, bombDelay:10, bombMin:4,   bombVy:[60, 30]},
-  medium: {baseSpeed:12, speedInc:5,  killBoost:0.6, bombDelay:6,  bombMin:2.5, bombVy:[110,60]},
-  hard:   {baseSpeed:22, speedInc:9,  killBoost:0.8, bombDelay:3,  bombMin:1.2, bombVy:[170,80]},
+  easy:   {baseSpeed:5,  speedInc:2,  killBoost:0.4, bombDelay:10, bombMin:4,   bombVy:[60, 30],  scoreMulti:1  },
+  medium: {baseSpeed:12, speedInc:5,  killBoost:0.6, bombDelay:6,  bombMin:2.5, bombVy:[110,60],  scoreMulti:1.5},
+  hard:   {baseSpeed:22, speedInc:9,  killBoost:0.8, bombDelay:3,  bombMin:1.2, bombVy:[170,80],  scoreMulti:2  },
 };
 let diff = DIFF.medium;
 let diffName = 'medium';
@@ -387,7 +387,7 @@ function update(dt){
       const e=l.enemy;
       if(e.alive){
         e.alive=false; e.targeted=false;
-        const pts=e.t*10; gScore+=pts;
+        const pts=Math.round(e.t*10*diff.scoreMulti); gScore+=pts;
         explode(l.tx,l.ty,TC[e.t]); sfx.kill(); updateHUD();
         showMsg(`+${pts}  ${e.c} — ${e.h}`,'#00ff88',1800);
         if(enemies.every(en=>!en.alive)){gWave++;waveWonTimer=2.8;gState='WAVEWON';updateHUD();sfx.wave();}
