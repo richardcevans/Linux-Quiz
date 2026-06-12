@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terminal Invaders – Linux Edition</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#020804; font-family:'Courier New',Courier,monospace;
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; min-height:100vh;
+  }
+  #wrap { border:1px solid #0a2a0a; box-shadow:0 0 50px rgba(0,255,80,.1); user-select:none; }
+
+  /* HUD */
+  #hud {
+    background:#030c04; border-bottom:1px solid #0a2a0a;
+    padding:5px 16px; display:flex; gap:24px; align-items:center;
+    font-size:13px; color:#2d6b2d; letter-spacing:.5px;
+  }
+  .hv { color:#00ff66; }
+  #hud-right { margin-left:auto; display:flex; gap:16px; align-items:center; font-size:11px; color:#153315; }
+  #hint-tip { color:#aa7700; cursor:default; }
+
+  /* Canvas wrapper */
+  #canvas-wrap { position:relative; width:800px; height:520px; }
+  canvas { display:block; }
+
+  /* Title screen overlay */
+  #title-screen {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:#020804; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:13px; padding:20px 50px;
+    overflow:hidden;
+  }
+  #title-screen.hidden { display:none; }
+  .ts-title {
+    font-family:'Courier New',monospace; font-size:40px; font-weight:bold;
+    color:#00ff88; letter-spacing:3px;
+    text-shadow:0 0 18px #00ff88, 0 0 36px #00ff8866;
+  }
+  .ts-sub { font-family:'Courier New',monospace; font-size:13px; color:#2d9c5a; letter-spacing:1px; }
+  .ts-box {
+    border:1px solid #0d3a0d; background:rgba(3,14,4,.95);
+    padding:14px 28px; border-radius:4px;
+    font-family:Arial,Helvetica,sans-serif; font-size:14px; line-height:1.6;
+    color:#4aaa6a; text-align:center; max-width:600px;
+  }
+  .ts-box strong { color:#00ff88; font-family:'Courier New',monospace; }
+  .ts-tiers { display:flex; gap:22px; font-family:Arial,Helvetica,sans-serif; font-size:13px; }
+  .ts-tiers .t1{color:#00ff88} .ts-tiers .t2{color:#00ccff}
+  .ts-tiers .t3{color:#ffaa00} .ts-tiers .t4{color:#ff5577}
+  .ts-diff { display:flex; gap:14px; align-items:center; }
+  .ts-diff-label { font-family:'Courier New',monospace; font-size:13px; color:#2d6b2d; }
+  .diff-btn {
+    font-family:'Courier New',monospace; font-size:14px; font-weight:bold;
+    padding:7px 22px; border-radius:3px; cursor:pointer;
+    letter-spacing:1px; border:1.5px solid; transition:all .15s; background:transparent;
+  }
+  .diff-btn:hover { filter:brightness(1.3); }
+  #btn-easy   { color:#00ff88; border-color:#00ff88; }
+  #btn-easy:hover   { background:#00ff8822; }
+  #btn-medium { color:#ffcc00; border-color:#ffcc00; }
+  #btn-medium:hover { background:#ffcc0022; }
+  #btn-hard   { color:#ff5577; border-color:#ff5577; }
+  #btn-hard:hover   { background:#ff557722; }
+
+  /* Title screen high scores */
+  .ts-scores {
+    border:1px solid #0d3a0d; background:rgba(3,14,4,.9);
+    padding:10px 20px; border-radius:4px; min-width:400px;
+  }
+  .ts-score-hdr {
+    font-family:'Courier New',monospace; font-size:12px; color:#aa8800;
+    text-align:center; letter-spacing:2px; margin-bottom:7px;
+  }
+  #ts-score-list { font-family:'Courier New',monospace; font-size:12px; }
+  .sc-row { display:flex; gap:0; padding:2px 0; }
+  .sc-rank { color:#336633; width:30px; }
+  .sc-init { color:#00ff88; font-weight:bold; width:40px; }
+  .sc-pts  { color:#00ccff; width:55px; text-align:right; padding-right:12px; }
+  .sc-diff { width:60px; }
+  .diff-easy   { color:#00ff88; } .diff-medium { color:#ffcc00; } .diff-hard { color:#ff5577; }
+  .sc-wave { color:#2d6b2d; }
+  .sc-empty { color:#1a4a1a; font-size:11px; text-align:center; padding:6px 0; }
+
+  /* Input bar */
+  #irow {
+    background:#030c04; border-top:1px solid #0a2a0a;
+    padding:7px 16px; display:flex; align-items:center; gap:8px;
+  }
+  #pmt { color:#2d6b2d; font-size:15px; white-space:nowrap; }
+  #cmd {
+    flex:1; background:transparent; border:none; outline:none;
+    color:#00ff66; font-family:'Courier New',Courier,monospace;
+    font-size:15px; letter-spacing:.5px; caret-color:#00ff66;
+  }
+  #cmd::placeholder { color:#0d2a0d; }
+  #mbar {
+    background:#030c04; border-top:1px solid #071607;
+    padding:3px 16px; min-height:21px; font-size:12px; color:#ff5555; letter-spacing:.3px;
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud">
+    <span>TERMINAL INVADERS</span>
+    <span>SCORE&nbsp;<span class="hv" id="hs">0</span></span>
+    <span>LIVES&nbsp;<span class="hv" id="hl">♥♥♥</span></span>
+    <span>WAVE&nbsp;<span class="hv" id="hw">1</span></span>
+    <div id="hud-right">
+      <span id="hint-tip">[Ctrl+H] = hint (-1 life)</span>
+      <span>type command + ENTER to fire</span>
+    </div>
+  </div>
+
+  <div id="canvas-wrap">
+    <canvas id="c" width="800" height="520"></canvas>
+
+    <div id="title-screen">
+      <div class="ts-title">TERMINAL INVADERS</div>
+      <div class="ts-sub">Linux Command Training &nbsp;&#9670;&nbsp; ITSC 1301 &amp; 2325</div>
+      <div class="ts-box">
+        <p>Enemies descend showing a hint. Type the matching Linux command and press <strong>ENTER</strong> to fire.</p>
+        <p style="margin-top:6px">Enemies reaching the bottom or bombs cost a LIFE &mdash; 3 lives total.
+        Press <strong>Ctrl+H</strong> for a hint (costs 1 life).</p>
+        <p style="margin-top:6px">5 waves &bull; 6 random commands per wave &bull; 30 unique commands total</p>
+      </div>
+      <div class="ts-tiers">
+        <span class="t1">&#9632; Basic (10 pts)</span>
+        <span class="t2">&#9632; Files (20 pts)</span>
+        <span class="t3">&#9632; System (30 pts)</span>
+        <span class="t4">&#9632; Advanced (40 pts)</span>
+      </div>
+      <div class="ts-diff">
+        <span class="ts-diff-label">SELECT DIFFICULTY:</span>
+        <button class="diff-btn" id="btn-easy">EASY</button>
+        <button class="diff-btn" id="btn-medium">MEDIUM</button>
+        <button class="diff-btn" id="btn-hard">HARD</button>
+      </div>
+      <div class="ts-scores">
+        <div class="ts-score-hdr">&#9660; HIGH SCORES &#9660;</div>
+        <div id="ts-score-list"><div class="sc-empty">No scores yet &mdash; be the first!</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="irow">
+    <span id="pmt">student@linux:~$</span>
+    <input id="cmd" type="text"
+      autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+      placeholder="type a Linux command…" />
+  </div>
+  <div id="mbar"></div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ── DOM ──────────────────────────────────────────────────────────────────────
+const C       = document.getElementById('c');
+const ctx     = C.getContext('2d');
+const cmdEl   = document.getElementById('cmd');
+const hsEl    = document.getElementById('hs');
+const hlEl    = document.getElementById('hl');
+const hwEl    = document.getElementById('hw');
+const mbEl    = document.getElementById('mbar');
+const titleEl = document.getElementById('title-screen');
+
+const W = C.width, H = C.height;
+
+// ── Layout ────────────────────────────────────────────────────────────────────
+const EW=122, EH=46, EGAPX=8, EGAPY=14, COLS=6;
+const FX_ORIG  = Math.floor((W - (COLS*EW + (COLS-1)*EGAPX)) / 2);
+const FY_START = 60;
+const PLAYER_CX = W/2, PLAYER_Y = H-48, GROUND_Y = H-80;
+
+// ── Colors ────────────────────────────────────────────────────────────────────
+const TC = {1:'#00ff88', 2:'#00ccff', 3:'#ffaa00', 4:'#ff5577'};
+
+// ── Command pool (30 commands) ────────────────────────────────────────────────
+const POOL = [
+  {c:'ls',    h:'list files',     t:1}, {c:'pwd',   h:'working dir',   t:1},
+  {c:'cd',    h:'change dir',     t:1}, {c:'clear', h:'clear screen',   t:1},
+  {c:'date',  h:'date & time',    t:1}, {c:'echo',  h:'print text',     t:1},
+  {c:'cat',   h:'view file',      t:2}, {c:'cp',    h:'copy file',      t:2},
+  {c:'mv',    h:'move/rename',    t:2}, {c:'rm',    h:'delete file',    t:2},
+  {c:'mkdir', h:'make directory', t:2}, {c:'touch', h:'empty file',     t:2},
+  {c:'head',  h:'first 10 lines', t:2}, {c:'tail',  h:'last 10 lines',  t:2},
+  {c:'less',  h:'page thru file', t:2},
+  {c:'ps',    h:'list processes', t:3}, {c:'top',   h:'process viewer', t:3},
+  {c:'free',  h:'memory usage',   t:3}, {c:'df',    h:'disk space',     t:3},
+  {c:'who',   h:'logged users',   t:3}, {c:'whoami',h:'current user',   t:3},
+  {c:'kill',  h:'stop process',   t:3}, {c:'grep',  h:'search files',   t:3},
+  {c:'man',   h:'manual page',    t:3},
+  {c:'chmod', h:'permissions',    t:4}, {c:'chown', h:'file owner',     t:4},
+  {c:'ssh',   h:'remote login',   t:4}, {c:'wget',  h:'download file',  t:4},
+  {c:'find',  h:'locate files',   t:4}, {c:'diff',  h:'compare files',  t:4},
+]; // 30 commands
+
+// ── Difficulty ────────────────────────────────────────────────────────────────
+const DIFF = {
+  easy:   {baseSpeed:5,  speedInc:2,  killBoost:0.4, bombDelay:10, bombMin:4,   bombVy:[60, 30]},
+  medium: {baseSpeed:12, speedInc:5,  killBoost:0.6, bombDelay:6,  bombMin:2.5, bombVy:[110,60]},
+  hard:   {baseSpeed:22, speedInc:9,  killBoost:0.8, bombDelay:3,  bombMin:1.2, bombVy:[170,80]},
+};
+let diff = DIFF.medium;
+let diffName = 'medium';
+
+// ── High scores ───────────────────────────────────────────────────────────────
+const LS_KEY = 'termInv_scores_v1';
+function loadScores() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch { return []; }
+}
+function saveScores(s) { try { localStorage.setItem(LS_KEY, JSON.stringify(s)); } catch {} }
+function qualifies(score) {
+  const s = loadScores(); return score > 0 && (s.length < 10 || score > (s[9]?.score ?? 0));
+}
+function submitScore(init, score, wave, dn) {
+  const s = loadScores();
+  s.push({initials:init.toUpperCase(), score, wave, diff:dn});
+  s.sort((a,b) => b.score - a.score); s.splice(10);
+  saveScores(s); refreshTitleScores();
+}
+const DIFF_COL = {easy:'#00ff88', medium:'#ffcc00', hard:'#ff5577'};
+function refreshTitleScores() {
+  const el = document.getElementById('ts-score-list');
+  if (!el) return;
+  const s = loadScores();
+  if (!s.length) { el.innerHTML='<div class="sc-empty">No scores yet &mdash; be the first!</div>'; return; }
+  const rankCol = ['#ffcc00','#cccccc','#cc8844'];
+  el.innerHTML = s.map((r,i) =>
+    `<div class="sc-row">
+      <span class="sc-rank" style="color:${rankCol[i]||'#336633'}">#${i+1}</span>
+      <span class="sc-init">${r.initials}</span>
+      <span class="sc-pts">${r.score}</span>
+      <span class="sc-diff diff-${r.diff}">${r.diff.toUpperCase()}</span>
+      <span class="sc-wave">W${r.wave}</span>
+    </div>`
+  ).join('');
+}
+
+// ── Game state ────────────────────────────────────────────────────────────────
+// States: TITLE | PLAYING | HINT_CONFIRM | WAVEWON | GAMEOVER | VICTORY | INITIALS | HIGHSCORES
+let gState = 'TITLE';
+let gScore=0, gLives=3, gWave=1;
+let blink=0;
+let wavePool=[], wavePoolIdx=0;
+let prevState = 'PLAYING'; // state to return to after hint confirm
+
+// Hint state
+let hintPending = false;   // confirmation overlay showing
+
+// Initials entry
+let initLetters = ['','',''];
+let initPos = 0;
+let initScore = 0, initWave = 0;
+
+// Formation
+let fmX=FX_ORIG, fmY=FY_START, fmDir=1, fmSpeed=12;
+
+// Entities
+let enemies=[], lasers=[], particles=[], bombs=[];
+let bombTimer=0, waveWonTimer=0, shakeTimer=0, lastT=null;
+
+// ── Audio ─────────────────────────────────────────────────────────────────────
+let au=null;
+function initAu() { if (!au) au=new (window.AudioContext||window.webkitAudioContext)(); }
+function tone(f,d,t='square',v=0.07) {
+  if (!au) return;
+  try {
+    const o=au.createOscillator(),g=au.createGain();
+    o.connect(g); g.connect(au.destination);
+    o.type=t; o.frequency.value=f;
+    g.gain.setValueAtTime(v,au.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,au.currentTime+d);
+    o.start(); o.stop(au.currentTime+d);
+  } catch(e){}
+}
+const sfx = {
+  fire: ()=>tone(520,.12,'sawtooth',.08),
+  kill: ()=>{tone(220,.15,'square',.08);setTimeout(()=>tone(110,.2,'sawtooth',.07),80);},
+  miss: ()=>tone(160,.07,'square',.05),
+  bomb: ()=>{tone(100,.35,'square',.12);tone(80,.5,'sawtooth',.08);},
+  wave: ()=>[600,750,900].forEach((f,i)=>setTimeout(()=>tone(f,.12,'sine',.1),i*110)),
+  over: ()=>[380,300,200,110].forEach((f,i)=>setTimeout(()=>tone(f,.25,'square'),i*200)),
+  win:  ()=>[523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.2,'sine',.14),i*130)),
+  hint: ()=>{tone(440,.1,'sine',.08);setTimeout(()=>tone(330,.15,'sine',.06),120);},
+};
+
+// ── Utilities ─────────────────────────────────────────────────────────────────
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+let msgT=null;
+function showMsg(txt,col='#ff5555',dur=2200){
+  mbEl.textContent=txt; mbEl.style.color=col;
+  clearTimeout(msgT); msgT=setTimeout(()=>{mbEl.textContent='';},dur);
+}
+function updateHUD(){
+  hsEl.textContent=gScore;
+  hlEl.textContent='♥'.repeat(Math.max(0,gLives))+'♡'.repeat(Math.max(0,3-gLives));
+  hwEl.textContent=gWave;
+}
+function ePos(e){ return {x:fmX+e.col*(EW+EGAPX), y:fmY+e.row*(EH+EGAPY)}; }
+
+// ── Spawn wave ────────────────────────────────────────────────────────────────
+function spawnWave(n){
+  enemies=[]; lasers=[]; bombs=[];
+  bombTimer=diff.bombDelay+Math.random()*2;
+  const picks=wavePool.slice(wavePoolIdx,wavePoolIdx+6); wavePoolIdx+=6;
+  enemies=picks.map((p,i)=>({c:p.c,h:p.h,t:p.t,col:i,row:0,alive:true,targeted:false,hintShown:false}));
+  fmX=FX_ORIG; fmY=FY_START; fmDir=1;
+  fmSpeed=diff.baseSpeed+(n-1)*diff.speedInc;
+}
+
+// ── Particles ─────────────────────────────────────────────────────────────────
+const DEBRIS=['#','$','%','!','*','+','~'];
+function explode(x,y,color){
+  for(let i=0;i<18;i++){
+    const a=Math.random()*Math.PI*2,s=50+Math.random()*170;
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s-50,life:1,maxLife:.5+Math.random()*.6,color,r:1.5+Math.random()*3});
+  }
+  for(let i=0;i<5;i++)
+    particles.push({x,y,vx:(Math.random()-.5)*130,vy:(Math.random()-.5)*130-40,life:1,maxLife:.7+Math.random()*.5,color,r:-1,char:DEBRIS[Math.floor(Math.random()*DEBRIS.length)]});
+}
+
+// ── Hint logic ────────────────────────────────────────────────────────────────
+function useHint(){
+  // Find first alive un-hinted enemy (leftmost)
+  const target = enemies.find(e=>e.alive && !e.hintShown);
+  if (!target){ showMsg('All commands already revealed!','#ffaa00',2000); return; }
+  target.hintShown=true;
+  gLives--;
+  updateHUD();
+  sfx.hint();
+  showMsg(`HINT: the answer is "${target.c}" — 1 life spent`,'#ffcc44',3500);
+  if(gLives<=0){ gState='GAMEOVER'; sfx.over(); }
+}
+
+// ── Fire ──────────────────────────────────────────────────────────────────────
+function tryFire(typed){
+  typed=typed.trim().toLowerCase();
+  if(!typed) return;
+  let target=null;
+  for(const e of enemies){ if(!e.alive||e.c!==typed) continue; if(!target||e.row>target.row) target=e; }
+  if(!target){ showMsg(`bash: ${typed}: command not found in this wave`,'#ff5555'); sfx.miss(); return; }
+  const {x:ex,y:ey}=ePos(target);
+  lasers.push({x:PLAYER_CX,y:PLAYER_Y,tx:ex+EW/2,ty:ey+EH/2,color:TC[target.t],enemy:target,progress:0,done:false});
+  target.targeted=true; sfx.fire();
+}
+
+// ── Update ────────────────────────────────────────────────────────────────────
+function update(dt){
+  blink+=dt;
+  if(['TITLE','GAMEOVER','VICTORY','HINT_CONFIRM','INITIALS','HIGHSCORES'].includes(gState)) return;
+  if(gState==='WAVEWON'){
+    waveWonTimer-=dt;
+    if(waveWonTimer<=0){
+      if(gWave>5){gState='VICTORY';sfx.win();}
+      else{spawnWave(gWave);gState='PLAYING';updateHUD();sfx.wave();}
+    }
+    updateParticles(dt); return;
+  }
+  if(shakeTimer>0) shakeTimer-=dt;
+
+  // Formation
+  const alive=enemies.filter(e=>e.alive);
+  if(alive.length>0){
+    const spd=fmSpeed*(1+(1-alive.length/enemies.length)*diff.killBoost);
+    fmX+=fmDir*spd*dt;
+    let minC=Infinity,maxC=-Infinity,maxR=-Infinity;
+    for(const e of alive){if(e.col<minC)minC=e.col;if(e.col>maxC)maxC=e.col;if(e.row>maxR)maxR=e.row;}
+    const left=fmX+minC*(EW+EGAPX), right=fmX+maxC*(EW+EGAPX)+EW, bottom=fmY+maxR*(EH+EGAPY)+EH;
+    if(fmDir===1&&right>=W-8){fmX-=right-(W-8);fmY+=20;fmDir=-1;}
+    else if(fmDir===-1&&left<=8){fmX+=8-left;fmY+=20;fmDir=1;}
+    if(bottom>=GROUND_Y){loseLife('SYSTEM BREACH — enemies reached the ground!');return;}
+  }
+
+  // Lasers
+  for(const l of lasers){
+    if(l.done) continue;
+    l.progress+=dt/0.22;
+    if(l.progress>=1){
+      l.progress=1; l.done=true;
+      const e=l.enemy;
+      if(e.alive){
+        e.alive=false; e.targeted=false;
+        const pts=e.t*10; gScore+=pts;
+        explode(l.tx,l.ty,TC[e.t]); sfx.kill(); updateHUD();
+        showMsg(`+${pts}  ${e.c} — ${e.h}`,'#00ff88',1800);
+        if(enemies.every(en=>!en.alive)){gWave++;waveWonTimer=2.8;gState='WAVEWON';updateHUD();sfx.wave();}
+      }
+    }
+  }
+  lasers=lasers.filter(l=>!l.done);
+
+  // Bombs
+  bombTimer-=dt;
+  if(bombTimer<=0&&alive.length>0){
+    const src=alive[Math.floor(Math.random()*alive.length)];
+    const {x:bx,y:by}=ePos(src);
+    const [bvy,bvr]=diff.bombVy;
+    bombs.push({x:bx+EW/2,y:by+EH,vy:bvy+Math.random()*bvr});
+    bombTimer=Math.max(diff.bombMin,diff.bombDelay-(gWave-1)*.4)+Math.random()*1.5;
+  }
+  for(const b of bombs){
+    b.y+=b.vy*dt;
+    if(b.y>=PLAYER_Y-12&&Math.abs(b.x-PLAYER_CX)<22){
+      b.y=H+100; explode(PLAYER_CX,PLAYER_Y,'#ff4466');
+      loseLife('DIRECT HIT! The terminal took damage!'); return;
+    }
+  }
+  bombs=bombs.filter(b=>b.y<H+20);
+  updateParticles(dt);
+}
+
+function updateParticles(dt){
+  for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt;p.life-=dt/p.maxLife;}
+  particles=particles.filter(p=>p.life>0);
+}
+
+function loseLife(msg){
+  gLives--;shakeTimer=.55;updateHUD();sfx.bomb();showMsg(msg,'#ff5555');
+  if(gLives<=0){gState='GAMEOVER';sfx.over();}
+  else spawnWave(gWave);
+}
+
+// ── After game ends ───────────────────────────────────────────────────────────
+function proceedAfterGame(){
+  if(qualifies(gScore)){
+    initLetters=['','','']; initPos=0; initScore=gScore; initWave=gWave-1;
+    gState='INITIALS'; cmdEl.blur();
+  } else {
+    gState='HIGHSCORES'; cmdEl.blur();
+  }
+}
+
+// ── Drawing ───────────────────────────────────────────────────────────────────
+function glowText(t,x,y,col,font,blur=6){
+  ctx.save(); ctx.font=font; ctx.fillStyle=col; ctx.shadowBlur=blur; ctx.shadowColor=col;
+  ctx.textAlign='center'; ctx.fillText(t,x,y); ctx.restore();
+}
+function drawStars(){
+  ctx.fillStyle='#0a1f0a';
+  for(let i=0;i<70;i++) ctx.fillRect((i*137.5088)%W|0,(i*97.3111+i*19.7)%H|0,1,1);
+}
+function drawScanlines(){
+  ctx.fillStyle='rgba(0,0,0,.07)'; for(let y=0;y<H;y+=2) ctx.fillRect(0,y,W,1);
+}
+function drawGroundLine(){
+  ctx.save(); ctx.setLineDash([4,6]); ctx.strokeStyle='#0e300e'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(0,GROUND_Y); ctx.lineTo(W,GROUND_Y); ctx.stroke();
+  ctx.setLineDash([]); ctx.restore();
+}
+function drawPlayer(){
+  const x=PLAYER_CX,y=PLAYER_Y;
+  ctx.save(); ctx.shadowBlur=10; ctx.shadowColor='#00ff88'; ctx.fillStyle='#00ff88';
+  ctx.beginPath(); ctx.moveTo(x,y-18); ctx.lineTo(x+13,y+10); ctx.lineTo(x+5,y+6);
+  ctx.lineTo(x+5,y+12); ctx.lineTo(x-5,y+12); ctx.lineTo(x-5,y+6); ctx.lineTo(x-13,y+10);
+  ctx.closePath(); ctx.fill();
+  ctx.fillStyle='rgba(0,255,136,.25)'; ctx.shadowBlur=14; ctx.fillRect(x-4,y+12,8,5);
+  ctx.restore();
+}
+function drawEnemy(e){
+  if(!e.alive) return;
+  const {x,y}=ePos(e); const col=TC[e.t],tgt=e.targeted;
+  ctx.save();
+  ctx.shadowBlur=tgt?14:4; ctx.shadowColor=tgt?col:col+'55';
+  ctx.strokeStyle=tgt?'#ffffff':col; ctx.lineWidth=tgt?1.5:1;
+  ctx.strokeRect(x+.5,y+.5,EW-1,EH-1);
+  ctx.fillStyle=tgt?col+'22':col+'0d'; ctx.fillRect(x+1,y+1,EW-2,EH-2);
+  // corner accents
+  const cs=5; ctx.strokeStyle=col; ctx.lineWidth=1;
+  [[x,y,1,1],[x+EW,y,-1,1],[x,y+EH,1,-1],[x+EW,y+EH,-1,-1]].forEach(([cx,cy,dx,dy])=>{
+    ctx.beginPath();ctx.moveTo(cx+dx*cs,cy);ctx.lineTo(cx,cy);ctx.lineTo(cx,cy+dy*cs);ctx.stroke();
+  });
+  // hint text
+  ctx.shadowBlur=tgt?6:0; ctx.shadowColor=col;
+  ctx.fillStyle=tgt?'#ffffff':col;
+  ctx.font='11px "Courier New",monospace'; ctx.textAlign='center';
+  ctx.fillText(e.h, x+EW/2, y+EH/2+(e.hintShown?-3:4));
+  // revealed command (hint used)
+  if(e.hintShown){
+    ctx.fillStyle='#ffcc44'; ctx.shadowBlur=4; ctx.shadowColor='#ffcc44';
+    ctx.font='bold 12px "Courier New",monospace';
+    ctx.fillText('→ '+e.c, x+EW/2, y+EH-6);
+  } else if(Math.floor(blink*2.2)%2===0){
+    ctx.fillStyle=col+'77'; ctx.shadowBlur=0;
+    ctx.font='9px monospace'; ctx.fillText('▮',x+EW/2,y+EH-5);
+  }
+  ctx.restore();
+}
+function drawLaser(l){
+  const t0=Math.max(0,l.progress-.18);
+  const px=l.x+(l.tx-l.x)*l.progress,py=l.y+(l.ty-l.y)*l.progress;
+  const sx=l.x+(l.tx-l.x)*t0,sy=l.y+(l.ty-l.y)*t0;
+  ctx.save(); ctx.shadowBlur=10; ctx.shadowColor=l.color;
+  ctx.strokeStyle=l.color; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(px,py); ctx.stroke();
+  ctx.fillStyle='#ffffff'; ctx.shadowBlur=6; ctx.shadowColor=l.color;
+  ctx.beginPath(); ctx.arc(px,py,2.5,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+function drawBomb(b){
+  ctx.save(); ctx.fillStyle='#ff4466'; ctx.shadowBlur=6; ctx.shadowColor='#ff4466';
+  ctx.font='14px monospace'; ctx.textAlign='center';
+  ctx.fillText('|',b.x,b.y); ctx.fillText('·',b.x,b.y-7); ctx.restore();
+}
+function drawParticle(p){
+  ctx.save(); ctx.globalAlpha=Math.max(0,p.life);
+  if(p.r===-1){ctx.fillStyle=p.color;ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText(p.char,p.x,p.y);}
+  else{ctx.fillStyle=p.color;ctx.shadowBlur=3;ctx.shadowColor=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fill();}
+  ctx.globalAlpha=1; ctx.restore();
+}
+function drawScene(){
+  drawStars(); drawGroundLine();
+  enemies.forEach(drawEnemy); lasers.forEach(drawLaser);
+  bombs.forEach(drawBomb); particles.forEach(drawParticle);
+  drawPlayer();
+}
+
+// ── Overlay screens ───────────────────────────────────────────────────────────
+function drawHintConfirm(){
+  ctx.fillStyle='rgba(0,0,0,.75)'; ctx.fillRect(0,0,W,H);
+  // box
+  ctx.fillStyle='#030c04';
+  ctx.strokeStyle='#ffaa00'; ctx.lineWidth=1.5;
+  ctx.fillRect(210,175,380,190); ctx.strokeRect(210,175,380,190);
+  // content
+  glowText('USE A HINT?',W/2,218,'#ffcc44','bold 22px "Courier New",monospace',10);
+  glowText('Reveals one command and costs 1 LIFE.',W/2,252,'#aa8800','13px Arial,sans-serif',0);
+  if(gLives<=1)
+    glowText('⚠  WARNING: only 1 life remaining!',W/2,278,'#ff5577','bold 12px Arial,sans-serif',0);
+  glowText('[Y / ENTER]  Confirm',W/2,320,'#ffcc44','bold 13px "Courier New",monospace',4);
+  glowText('[N / ESC]  Cancel',W/2,342,'#666633','13px "Courier New",monospace',0);
+}
+
+function drawWaveWon(){
+  ctx.fillStyle='rgba(2,8,4,.78)'; ctx.fillRect(0,0,W,H);
+  glowText(`WAVE ${gWave-1} CLEARED`,W/2,H/2-28,'#00ff88','bold 30px "Courier New",monospace',18);
+  glowText(gWave>5?'PREPARING FINAL REPORT…':`INITIATING WAVE ${gWave}…`,W/2,H/2+14,'#2d9c5a','15px "Courier New",monospace',4);
+  glowText(`SCORE: ${gScore}`,W/2,H/2+46,'#1a6a1a','13px "Courier New",monospace',0);
+}
+
+function drawGameOver(){
+  ctx.fillStyle='rgba(3,2,2,.88)'; ctx.fillRect(0,0,W,H);
+  glowText('SYSTEM COMPROMISED',W/2,H/2-68,'#ff5577','bold 36px "Courier New",monospace',20);
+  glowText(`FINAL SCORE: ${gScore}`,W/2,H/2-14,'#ff8899','15px "Courier New",monospace',4);
+  glowText(`Wave ${Math.max(1,gWave-1)} of 5`,W/2,H/2+18,'#882233','13px "Courier New",monospace',0);
+  if(Math.floor(blink*2)%2===0)
+    glowText('[ PRESS ENTER TO CONTINUE ]',W/2,H/2+68,'#ff5577','bold 14px "Courier New",monospace',8);
+}
+
+function drawVictory(){
+  ctx.fillStyle='rgba(0,6,2,.9)'; ctx.fillRect(0,0,W,H);
+  glowText('ALL WAVES CLEARED!',W/2,H/2-80,'#00ff88','bold 36px "Courier New",monospace',22);
+  const ranks=[[1400,'KERNEL GUARDIAN'],[1000,'BASH WARRIOR'],[600,'SYSADMIN APPRENTICE'],[0,'LINUX RECRUIT']];
+  const rank=ranks.find(([m])=>gScore>=m)[1];
+  glowText('Terminal mastery achieved.',W/2,H/2-28,'#2d9c5a','14px "Courier New",monospace',4);
+  glowText(`FINAL SCORE: ${gScore}`,W/2,H/2+14,'#00ff88','bold 20px "Courier New",monospace',8);
+  glowText(`RANK: ${rank}`,W/2,H/2+50,'#00aa44','13px "Courier New",monospace',4);
+  if(Math.floor(blink*2)%2===0)
+    glowText('[ PRESS ENTER TO CONTINUE ]',W/2,H/2+100,'#00ff88','bold 13px "Courier New",monospace',8);
+}
+
+function drawInitials(){
+  ctx.fillStyle='#020804'; ctx.fillRect(0,0,W,H);
+  drawStars(); drawScanlines();
+  glowText('NEW HIGH SCORE!',W/2,80,'#ffcc00','bold 30px "Courier New",monospace',18);
+  glowText(`SCORE: ${initScore}    WAVE: ${initWave}/5    ${diffName.toUpperCase()}`,W/2,124,'#00ff88','bold 15px "Courier New",monospace',6);
+  glowText('ENTER YOUR INITIALS',W/2,175,'#4aaa6a','14px "Courier New",monospace',0);
+  // 3 letter boxes
+  const BW=90,BH=90,GAP=18,total=3*BW+2*GAP,sx=(W-total)/2;
+  for(let i=0;i<3;i++){
+    const bx=sx+i*(BW+GAP),by=200,active=i===initPos;
+    ctx.fillStyle=active?'#ffcc0015':'#00000033';
+    ctx.fillRect(bx,by,BW,BH);
+    ctx.strokeStyle=active?'#ffcc44':'#2d6b2d';
+    ctx.lineWidth=active?2:1;
+    ctx.strokeRect(bx,by,BW,BH);
+    if(initLetters[i]){
+      glowText(initLetters[i],bx+BW/2,by+66,active?'#ffcc44':'#00ff88','bold 52px "Courier New",monospace',active?14:4);
+    } else if(active&&Math.floor(blink*3)%2===0){
+      ctx.fillStyle='#ffcc4488'; ctx.fillRect(bx+BW/2-3,by+55,6,24);
+    }
+  }
+  const ready=initPos===3;
+  glowText('TYPE LETTERS  ·  BACKSPACE TO ERASE',W/2,322,'#2d6b2d','12px "Courier New",monospace',0);
+  if(ready&&Math.floor(blink*2)%2===0)
+    glowText('[ PRESS ENTER TO SAVE ]',W/2,356,'#ffcc44','bold 14px "Courier New",monospace',8);
+  else if(!ready)
+    glowText(`${3-initPos} more letter${3-initPos!==1?'s':''} needed`,W/2,356,'#2d4a2d','12px "Courier New",monospace',0);
+}
+
+function drawHighScores(){
+  ctx.fillStyle='#020804'; ctx.fillRect(0,0,W,H);
+  drawStars(); drawScanlines();
+  glowText('HIGH SCORES',W/2,58,'#ffcc00','bold 28px "Courier New",monospace',16);
+  const scores=loadScores();
+  if(!scores.length){
+    glowText('NO SCORES YET',W/2,H/2,'#2d6b2d','16px "Courier New",monospace',0);
+  } else {
+    const cols={rank:100,init:210,score:360,diff:490,wave:620};
+    // headers
+    ctx.save(); ctx.font='11px "Courier New",monospace'; ctx.textAlign='left';
+    ctx.fillStyle='#1a4a1a';
+    ['#','INIT','SCORE','DIFF','WAVE'].forEach((h,i)=>{
+      ctx.fillText(h,[cols.rank,cols.init,cols.score,cols.diff,cols.wave][i],92);
+    });
+    ctx.restore();
+    const rankPal=['#ffcc00','#cccccc','#cc8844'];
+    scores.forEach((s,i)=>{
+      const y=115+i*36;
+      const rc=rankPal[i]||'#336633';
+      glowText(`#${i+1}`,cols.rank+10,y,rc,'bold 15px "Courier New",monospace',i<3?8:0);
+      glowText(s.initials,cols.init+20,y,'#00ff88','bold 18px "Courier New",monospace',i<3?4:0);
+      glowText(String(s.score).padStart(4,' '),cols.score+18,y,'#00ccff','15px "Courier New",monospace',0);
+      glowText((s.diff||'?').toUpperCase(),cols.diff+25,y,DIFF_COL[s.diff]||'#888','13px "Courier New",monospace',0);
+      glowText(`W${s.wave||'?'}`,cols.wave+20,y,'#336633','13px "Courier New",monospace',0);
+    });
+  }
+  if(Math.floor(blink*2)%2===0)
+    glowText('[ PRESS ENTER TO CONTINUE ]',W/2,H-36,'#4aaa6a','bold 13px "Courier New",monospace',6);
+}
+
+// ── Main draw ─────────────────────────────────────────────────────────────────
+function draw(){
+  ctx.fillStyle='#020804'; ctx.fillRect(0,0,W,H);
+  let sx=0,sy=0;
+  if(shakeTimer>0){const m=7*(shakeTimer/.55);sx=(Math.random()-.5)*m;sy=(Math.random()-.5)*m;}
+  ctx.save(); ctx.translate(sx,sy);
+  switch(gState){
+    case 'TITLE': drawStars(); drawScanlines(); break;
+    case 'INITIALS': drawInitials(); break;
+    case 'HIGHSCORES': drawHighScores(); break;
+    default:
+      drawScene(); drawScanlines();
+      if(gState==='WAVEWON')      drawWaveWon();
+      else if(gState==='GAMEOVER') drawGameOver();
+      else if(gState==='VICTORY')  drawVictory();
+      if(hintPending) drawHintConfirm();
+  }
+  ctx.restore();
+}
+
+// ── Loop ──────────────────────────────────────────────────────────────────────
+function loop(ts){
+  const dt=lastT===null?0:Math.min((ts-lastT)/1000,.05);
+  lastT=ts; update(dt); draw(); requestAnimationFrame(loop);
+}
+
+// ── Game management ───────────────────────────────────────────────────────────
+function startGame(dn){
+  diff=DIFF[dn]; diffName=dn;
+  gScore=0; gLives=3; gWave=1; hintPending=false;
+  wavePool=shuffle(POOL); wavePoolIdx=0;
+  spawnWave(1);
+  gState='PLAYING';
+  titleEl.classList.add('hidden');
+  updateHUD(); sfx.wave(); cmdEl.focus(); mbEl.textContent='';
+}
+function backToTitle(){
+  gState='TITLE'; hintPending=false;
+  titleEl.classList.remove('hidden');
+  mbEl.textContent='';
+}
+
+// ── Difficulty buttons ────────────────────────────────────────────────────────
+['easy','medium','hard'].forEach(d=>{
+  document.getElementById('btn-'+d).addEventListener('click',()=>{initAu();startGame(d);});
+});
+
+// ── Keyboard handler ──────────────────────────────────────────────────────────
+cmdEl.addEventListener('keydown', e=>{
+  // Hint shortcut — Ctrl+H
+  if(e.ctrlKey && e.key.toLowerCase()==='h'){
+    e.preventDefault();
+    if(gState==='PLAYING' && !hintPending){ hintPending=true; cmdEl.blur(); }
+    return;
+  }
+  if(e.key!=='Enter') return;
+  initAu();
+  if(gState==='GAMEOVER'||gState==='VICTORY'){ proceedAfterGame(); return; }
+  if(gState!=='PLAYING') return;
+  const typed=cmdEl.value; cmdEl.value='';
+  if(typed.trim()) tryFire(typed);
+});
+
+// Document-level keys for hint confirm + initials + highscores
+document.addEventListener('keydown', e=>{
+  // Hint confirm overlay
+  if(hintPending){
+    e.preventDefault();
+    if(e.key==='y'||e.key==='Y'||e.key==='Enter'){ hintPending=false; useHint(); cmdEl.focus(); }
+    else if(e.key==='n'||e.key==='N'||e.key==='Escape'){ hintPending=false; cmdEl.focus(); }
+    return;
+  }
+  // Initials entry
+  if(gState==='INITIALS'){
+    e.preventDefault();
+    const k=e.key.toUpperCase();
+    if(/^[A-Z0-9]$/.test(k)&&initPos<3){ initLetters[initPos]=k; initPos++; }
+    else if(e.key==='Backspace'&&initPos>0){ initPos--; initLetters[initPos]=''; }
+    else if(e.key==='Enter'&&initPos===3){
+      submitScore(initLetters.join(''),initScore,initWave,diffName);
+      gState='HIGHSCORES';
+    }
+    return;
+  }
+  // High scores → back to title
+  if(gState==='HIGHSCORES'&&e.key==='Enter'){ e.preventDefault(); backToTitle(); return; }
+  // Game over / victory → proceed
+  if((gState==='GAMEOVER'||gState==='VICTORY')&&e.key==='Enter'){ e.preventDefault(); proceedAfterGame(); return; }
+  // Keep cmd focused during play
+  if(gState==='PLAYING'&&document.activeElement!==cmdEl) cmdEl.focus();
+});
+
+// Ctrl+H on cmd input also needs document-level catch for when input isn't focused
+document.addEventListener('keydown', e=>{
+  if(e.ctrlKey&&e.key.toLowerCase()==='h'&&gState==='PLAYING'&&!hintPending){
+    e.preventDefault(); hintPending=true; cmdEl.blur();
+  }
+},{capture:true});
+
+cmdEl.addEventListener('input',()=>{
+  const t=cmdEl.value.trim().toLowerCase();
+  for(const e of enemies) e.targeted=e.alive&&e.c===t;
+});
+
+C.addEventListener('click',()=>{
+  initAu();
+  if(gState==='GAMEOVER'||gState==='VICTORY') proceedAfterGame();
+  else if(gState==='HIGHSCORES') backToTitle();
+  else if(gState==='PLAYING'&&!hintPending) cmdEl.focus();
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+refreshTitleScores();
+updateHUD();
+requestAnimationFrame(loop);
+cmdEl.focus();
+
+})();
+</script>
+</body>
+</html>
