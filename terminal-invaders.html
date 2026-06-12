@@ -603,7 +603,6 @@ function drawHighScores(){
     glowText('NO SCORES YET',W/2,H/2,'#2d6b2d','16px "Courier New",monospace',0);
   } else {
     const cols={rank:100,init:210,score:360,diff:490,wave:620};
-    // headers
     ctx.save(); ctx.font='11px "Courier New",monospace'; ctx.textAlign='left';
     ctx.fillStyle='#1a4a1a';
     ['#','INIT','SCORE','DIFF','WAVE'].forEach((h,i)=>{
@@ -656,8 +655,7 @@ function startGame(dn){
   diff=DIFF[dn]; diffName=dn;
   gScore=0; gLives=3; gWave=1; hintPending=false;
   wavePool=shuffle(POOL); wavePoolIdx=0;
-  spawnWave(1);
-  gState='PLAYING';
+  spawnWave(1); gState='PLAYING';
   titleEl.classList.add('hidden');
   updateHUD(); sfx.wave(); cmdEl.focus(); mbEl.textContent='';
 }
@@ -672,9 +670,8 @@ function backToTitle(){
   document.getElementById('btn-'+d).addEventListener('click',()=>{initAu();startGame(d);});
 });
 
-// ── Keyboard handler ──────────────────────────────────────────────────────────
+// ── Input: cmd box ────────────────────────────────────────────────────────────
 cmdEl.addEventListener('keydown', e=>{
-  // Hint shortcut — Ctrl+H
   if(e.ctrlKey && e.key.toLowerCase()==='h'){
     e.preventDefault();
     if(gState==='PLAYING' && !hintPending){ hintPending=true; cmdEl.blur(); }
@@ -688,16 +685,14 @@ cmdEl.addEventListener('keydown', e=>{
   if(typed.trim()) tryFire(typed);
 });
 
-// Document-level keys for hint confirm + initials + highscores
+// ── Input: document level ─────────────────────────────────────────────────────
 document.addEventListener('keydown', e=>{
-  // Hint confirm overlay
   if(hintPending){
     e.preventDefault();
     if(e.key==='y'||e.key==='Y'||e.key==='Enter'){ hintPending=false; useHint(); cmdEl.focus(); }
     else if(e.key==='n'||e.key==='N'||e.key==='Escape'){ hintPending=false; cmdEl.focus(); }
     return;
   }
-  // Initials entry
   if(gState==='INITIALS'){
     e.preventDefault();
     const k=e.key.toUpperCase();
@@ -709,15 +704,12 @@ document.addEventListener('keydown', e=>{
     }
     return;
   }
-  // High scores → back to title
   if(gState==='HIGHSCORES'&&e.key==='Enter'){ e.preventDefault(); backToTitle(); return; }
-  // Game over / victory → proceed
   if((gState==='GAMEOVER'||gState==='VICTORY')&&e.key==='Enter'){ e.preventDefault(); proceedAfterGame(); return; }
-  // Keep cmd focused during play
   if(gState==='PLAYING'&&document.activeElement!==cmdEl) cmdEl.focus();
 });
 
-// Ctrl+H on cmd input also needs document-level catch for when input isn't focused
+// Capture Ctrl+H even when cmd not focused
 document.addEventListener('keydown', e=>{
   if(e.ctrlKey&&e.key.toLowerCase()==='h'&&gState==='PLAYING'&&!hintPending){
     e.preventDefault(); hintPending=true; cmdEl.blur();
