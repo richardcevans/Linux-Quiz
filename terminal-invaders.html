@@ -22,6 +22,14 @@
   .hv { color:#00ff66; }
   #hud-right { margin-left:auto; display:flex; gap:16px; align-items:center; font-size:11px; color:#153315; }
   #hint-tip { color:#aa7700; cursor:default; }
+  #hint-btn {
+    font-family:'Courier New',monospace; font-size:11px; padding:3px 10px;
+    border:1px solid #aa7700; color:#aa7700; background:transparent;
+    cursor:pointer; border-radius:3px; letter-spacing:.3px; display:none;
+    transition:background .1s;
+  }
+  #hint-btn:hover { background:#aa770022; }
+  #hint-btn.vis { display:inline-block; }
 
   /* Canvas wrapper */
   #canvas-wrap { position:relative; width:800px; height:520px; }
@@ -111,7 +119,7 @@
     <span>LIVES&nbsp;<span class="hv" id="hl">♥♥♥</span></span>
     <span>WAVE&nbsp;<span class="hv" id="hw">1</span></span>
     <div id="hud-right">
-      <span id="hint-tip">[Ctrl+H] = hint (-1 life)</span>
+      <span id="hint-tip">ESC or HINT btn = reveal (-1 life)</span>
       <span>type command + ENTER to fire</span>
     </div>
   </div>
@@ -125,8 +133,8 @@
       <div class="ts-box">
         <p>Enemies descend showing a hint. Type the matching Linux command and press <strong>ENTER</strong> to fire.</p>
         <p style="margin-top:6px">Enemies reaching the bottom or bombs cost a LIFE &mdash; 3 lives total.
-        Press <strong>Ctrl+H</strong> for a hint (costs 1 life).</p>
-        <p style="margin-top:6px">5 waves &bull; 6 random commands per wave &bull; 30 unique commands total</p>
+        Press <strong>ESC</strong> or click <strong>HINT</strong> to reveal a command (costs 1 life).</p>
+        <p style="margin-top:6px">5 waves &bull; 6 commands per wave &bull; drawn randomly from 137-command pool</p>
       </div>
       <div class="ts-tiers">
         <span class="t1">&#9632; Basic</span>
@@ -152,6 +160,7 @@
     <input id="cmd" type="text"
       autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
       placeholder="type a Linux command…" />
+    <button id="hint-btn">HINT (-1♥)</button>
   </div>
   <div id="mbar"></div>
 </div>
@@ -181,25 +190,152 @@ const PLAYER_CX = W/2, PLAYER_Y = H-48, GROUND_Y = H-80;
 // ── Colors ────────────────────────────────────────────────────────────────────
 const TC = {1:'#00ff88', 2:'#00ccff', 3:'#ffaa00', 4:'#ff5577'};
 
-// ── Command pool (30 commands) ────────────────────────────────────────────────
+// ── Command pool (137 commands — 30 drawn randomly per game) ─────────────────
 const POOL = [
-  {c:'ls',    h:'list files',     t:1}, {c:'pwd',   h:'working dir',   t:1},
-  {c:'cd',    h:'change dir',     t:1}, {c:'clear', h:'clear screen',   t:1},
-  {c:'date',  h:'date & time',    t:1}, {c:'echo',  h:'print text',     t:1},
-  {c:'cat',   h:'view file',      t:2}, {c:'cp',    h:'copy file',      t:2},
-  {c:'mv',    h:'move/rename',    t:2}, {c:'rm',    h:'delete file',    t:2},
-  {c:'mkdir', h:'make directory', t:2}, {c:'touch', h:'empty file',     t:2},
-  {c:'head',  h:'first 10 lines', t:2}, {c:'tail',  h:'last 10 lines',  t:2},
-  {c:'less',  h:'page thru file', t:2},
-  {c:'ps',    h:'list processes', t:3}, {c:'top',   h:'process viewer', t:3},
-  {c:'free',  h:'memory usage',   t:3}, {c:'df',    h:'disk space',     t:3},
-  {c:'who',   h:'logged users',   t:3}, {c:'whoami',h:'current user',   t:3},
-  {c:'kill',  h:'stop process',   t:3}, {c:'grep',  h:'search files',   t:3},
-  {c:'man',   h:'manual page',    t:3},
-  {c:'chmod', h:'permissions',    t:4}, {c:'chown', h:'file owner',     t:4},
-  {c:'ssh',   h:'remote login',   t:4}, {c:'wget',  h:'download file',  t:4},
-  {c:'find',  h:'locate files',   t:4}, {c:'diff',  h:'compare files',  t:4},
-]; // 30 commands
+  // Tier 1 — Basic navigation & everyday essentials
+  {c:'ls',         h:'list files',    t:1},
+  {c:'pwd',        h:'working dir',   t:1},
+  {c:'cd',         h:'change dir',    t:1},
+  {c:'clear',      h:'clear screen',  t:1},
+  {c:'date',       h:'date & time',   t:1},
+  {c:'echo',       h:'print text',    t:1},
+  {c:'mkdir',      h:'make directory',t:1},
+  {c:'touch',      h:'create file',   t:1},
+  {c:'who',        h:'logged users',  t:1},
+  {c:'whoami',     h:'current user',  t:1},
+  {c:'sudo',       h:'run as root',   t:1},
+  {c:'ping',       h:'test network',  t:1},
+  {c:'history',    h:'cmd history',   t:1},
+  // Tier 2 — Files, text & common tools
+  {c:'cat',        h:'view file',     t:1},
+  {c:'tac',        h:'reverse cat',   t:2},
+  {c:'more',       h:'basic pager',   t:2},
+  {c:'less',       h:'page thru file',t:2},
+  {c:'cp',         h:'copy file',     t:2},
+  {c:'mv',         h:'move/rename',   t:1},
+  {c:'rm',         h:'delete file',   t:1},
+  {c:'head',       h:'first 10 lines',t:2},
+  {c:'tail',       h:'last 10 lines', t:2},
+  {c:'vi',         h:'text editor',   t:2},
+  {c:'grep',       h:'search files',  t:2},
+  {c:'find',       h:'locate files',  t:2},
+  {c:'locate',     h:'fast file find',t:2},
+  {c:'man',        h:'manual page',   t:2},
+  {c:'diff',       h:'compare files', t:2},
+  {c:'chmod',      h:'permissions',   t:2},
+  {c:'chown',      h:'file owner',    t:2},
+  {c:'ln',         h:'create link',   t:2},
+  {c:'tar',        h:'archive files', t:2},
+  {c:'gzip',       h:'compress gz',   t:2},
+  {c:'zip',        h:'compress zip',  t:2},
+  {c:'unzip',      h:'extract zip',   t:2},
+  {c:'df',         h:'disk space',    t:2},
+  {c:'du',         h:'dir disk usage',t:2},
+  {c:'ssh',        h:'remote login',  t:2},
+  {c:'wget',       h:'download file', t:2},
+  {c:'kill',       h:'stop process',  t:2},
+  {c:'id',         h:'show uid/gid',  t:2},
+  {c:'last',       h:'login history', t:2},
+  {c:'w',          h:'user activity', t:2},
+  {c:'sleep',      h:'pause script',  t:2},
+  {c:'alias',      h:'command alias', t:2},
+  {c:'env',        h:'show env vars', t:2},
+  // Tier 3 — System, users, services & scripting
+  {c:'ps',         h:'proc snapshot', t:1},
+  {c:'top',        h:'monitor procs', t:3},
+  {c:'htop',       h:'enhanced top',  t:3},
+  {c:'atop',       h:'server monitor',t:3},
+  {c:'pstree',     h:'process tree',  t:3},
+  {c:'free',       h:'memory usage',  t:3},
+  {c:'uname',      h:'kernel info',   t:3},
+  {c:'uptime',     h:'system uptime', t:3},
+  {c:'hostname',   h:'show hostname', t:3},
+  {c:'vmstat',     h:'mem/cpu stats', t:3},
+  {c:'iostat',     h:'i/o stats',     t:3},
+  {c:'iotop',      h:'disk i/o view', t:3},
+  {c:'dstat',      h:'live sys stats',t:3},
+  {c:'ncdu',       h:'disk usage ui', t:3},
+  {c:'dmesg',      h:'kernel log',    t:3},
+  {c:'journalctl', h:'systemd logs',  t:3},
+  {c:'rsync',      h:'sync files',    t:3},
+  {c:'scp',        h:'secure copy',   t:3},
+  {c:'curl',       h:'transfer data', t:3},
+  {c:'bzip2',      h:'compress bzip', t:3},
+  {c:'useradd',    h:'add user',      t:3},
+  {c:'adduser',    h:'add user guide',t:3},
+  {c:'usermod',    h:'modify user',   t:3},
+  {c:'userdel',    h:'delete user',   t:3},
+  {c:'passwd',     h:'set password',  t:3},
+  {c:'groups',     h:'show groups',   t:3},
+  {c:'su',         h:'switch user',   t:3},
+  {c:'umask',      h:'default perms', t:3},
+  {c:'gpasswd',    h:'group password', t:3},
+  {c:'groupadd',   h:'add new group',  t:3},
+  {c:'groupmod',   h:'modify group',   t:3},
+  {c:'groupdel',   h:'delete group',   t:3},
+  {c:'apt',        h:'apt packages',  t:3},
+  {c:'dpkg',       h:'debian pkg mgr',t:3},
+  {c:'systemctl',  h:'manage service',t:3},
+  {c:'lsblk',      h:'block devices', t:3},
+  {c:'mount',      h:'mount storage', t:3},
+  {c:'umount',     h:'unmount fs',    t:3},
+  {c:'killall',    h:'kill by name',  t:3},
+  {c:'nohup',      h:'no hangup run', t:3},
+  {c:'screen',     h:'screen session',t:3},
+  {c:'tmux',       h:'terminal mux',  t:3},
+  {c:'bg',         h:'run background',t:3},
+  {c:'fg',         h:'to foreground', t:3},
+  {c:'jobs',       h:'list jobs',     t:3},
+  {c:'awk',        h:'text processor',t:3},
+  {c:'sed',        h:'stream editor', t:3},
+  {c:'watch',      h:'repeat command',t:3},
+  {c:'crontab',    h:'schedule tasks',t:3},
+  {c:'xargs',      h:'pipe to args',  t:3},
+  // Tier 4 — Advanced networking, disk & specialized tools
+  {c:'ifconfig',   h:'net interface', t:4},
+  {c:'ip',         h:'manage network',t:2},
+  {c:'netstat',    h:'network conns', t:4},
+  {c:'ss',         h:'socket stats',  t:4},
+  {c:'traceroute', h:'trace network', t:4},
+  {c:'mtr',        h:'network diag',  t:4},
+  {c:'nslookup',   h:'dns lookup',    t:4},
+  {c:'dig',        h:'dns query',     t:4},
+  {c:'host',       h:'dns resolver',  t:4},
+  {c:'whois',      h:'domain info',   t:4},
+  {c:'nmap',       h:'scan ports',    t:4},
+  {c:'tcpdump',    h:'packet capture',t:4},
+  {c:'nc',         h:'network socket',t:4},
+  {c:'iftop',      h:'net traffic',   t:4},
+  {c:'nethogs',    h:'net by process',t:4},
+  {c:'nmcli',      h:'manage conns',  t:4},
+  {c:'pkill',      h:'kill pattern',  t:4},
+  {c:'nice',       h:'set priority',  t:4},
+  {c:'renice',     h:'adj priority',  t:4},
+  {c:'lsof',       h:'open file list',t:4},
+  {c:'strace',     h:'trace syscalls',t:4},
+  {c:'sar',        h:'sys activity',  t:4},
+  {c:'service',    h:'sysv service',  t:4},
+  {c:'dd',         h:'raw disk copy', t:4},
+  {c:'fdisk',      h:'partition disk',t:4},
+  {c:'parted',     h:'partition tool',t:4},
+  {c:'mkfs',       h:'format drive',  t:4},
+  {c:'blkid',      h:'block uuid',    t:4},
+  {c:'fsck',       h:'repair fs',     t:4},
+  {c:'chroot',     h:'change root',   t:4},
+  {c:'tune2fs',    h:'tune extfs',    t:4},
+  {c:'swapoff',    h:'disable swap',  t:4},
+  {c:'swapon',     h:'enable swap',   t:4},
+  {c:'lspci',      h:'list pci devs', t:4},
+  {c:'lsusb',      h:'list usb devs', t:4},
+  {c:'yum',        h:'rhel packages', t:4},
+  {c:'dnf',        h:'dnf packages',  t:4},
+  {c:'rpm',        h:'rpm packages',  t:4},
+  {c:'pacman',     h:'arch packages', t:4},
+  {c:'snap',       h:'snap packages', t:4},
+  {c:'flatpak',    h:'flatpak apps',  t:4},
+  {c:'brew',       h:'homebrew pkgs', t:4},
+  {c:'chpasswd',   h:'bulk passwords',t:4},
+];
 
 // ── Difficulty ────────────────────────────────────────────────────────────────
 const DIFF = {
@@ -248,7 +384,32 @@ function refreshTitleScores() {
 let gState = 'TITLE';
 let gScore=0, gLives=3, gWave=1;
 let blink=0;
-let wavePool=[], wavePoolIdx=0;
+// Per-tier shuffle pools
+const TPOOL = {1:[],2:[],3:[],4:[]};
+const TPOOL_IDX = {1:0,2:0,3:0,4:0};
+function initTPools(){ [1,2,3,4].forEach(t=>{ TPOOL[t]=shuffle(POOL.filter(p=>p.t===t)); TPOOL_IDX[t]=0; }); }
+function pickTier(t, n){
+  if(TPOOL_IDX[t]+n > TPOOL[t].length){ TPOOL[t]=shuffle(POOL.filter(p=>p.t===t)); TPOOL_IDX[t]=0; }
+  const picks=TPOOL[t].slice(TPOOL_IDX[t], TPOOL_IDX[t]+n); TPOOL_IDX[t]+=n; return picks;
+}
+// Wave composition: array of {t, n} pairs summing to total enemies needed
+function waveComposition(wave){
+  if(wave===1) return [{t:1,n:6}];
+  if(wave===2) return [{t:1,n:4},{t:2,n:2}];
+  if(wave===3) return [{t:1,n:2},{t:2,n:4}];
+  if(wave===4) return [{t:2,n:4},{t:3,n:2}];
+  if(wave===5) return [{t:2,n:2},{t:3,n:4}];
+  // wave 6+ two rows (12 enemies)
+  if(wave<=8)  return [{t:2,n:3},{t:3,n:6},{t:4,n:3}];
+  if(wave<=11) return [{t:3,n:4},{t:4,n:8}];
+  return [{t:3,n:2},{t:4,n:10}];
+}
+function pickForWave(wave){
+  const comp=waveComposition(wave);
+  const picks=comp.flatMap(({t,n})=>pickTier(t,n));
+  // sort so lower tiers appear first (top row in two-row formation)
+  return picks.sort((a,b)=>a.t-b.t);
+}
 let prevState = 'PLAYING'; // state to return to after hint confirm
 
 // Hint state
@@ -306,13 +467,23 @@ function updateHUD(){
 function ePos(e){ return {x:fmX+e.col*(EW+EGAPX), y:fmY+e.row*(EH+EGAPY)}; }
 
 // ── Spawn wave ────────────────────────────────────────────────────────────────
-function spawnWave(n){
+let currentWavePicks = [];  // saved so respawns don't burn pool slots
+
+function spawnWave(n, isRespawn=false){
+  const twoRows = n >= 6;
   enemies=[]; lasers=[]; bombs=[];
   bombTimer=diff.bombDelay+Math.random()*2;
-  const picks=wavePool.slice(wavePoolIdx,wavePoolIdx+6); wavePoolIdx+=6;
-  enemies=picks.map((p,i)=>({c:p.c,h:p.h,t:p.t,col:i,row:0,alive:true,targeted:false,hintShown:false}));
+  if(!isRespawn){
+    currentWavePicks=pickForWave(n);
+  }
+  enemies=currentWavePicks.map((p,i)=>({
+    c:p.c,h:p.h,t:p.t,
+    col:i%6, row:twoRows?Math.floor(i/6):0,
+    alive:true,targeted:false,hintShown:false
+  }));
   fmX=FX_ORIG; fmY=FY_START; fmDir=1;
-  fmSpeed=diff.baseSpeed+(n-1)*diff.speedInc;
+  const speedN=Math.min(n-1,12);
+  fmSpeed=diff.baseSpeed+speedN*diff.speedInc;
 }
 
 // ── Particles ─────────────────────────────────────────────────────────────────
@@ -354,12 +525,11 @@ function tryFire(typed){
 // ── Update ────────────────────────────────────────────────────────────────────
 function update(dt){
   blink+=dt;
-  if(['TITLE','GAMEOVER','VICTORY','HINT_CONFIRM','INITIALS','HIGHSCORES'].includes(gState)) return;
+  if(['TITLE','GAMEOVER','HINT_CONFIRM','INITIALS','HIGHSCORES'].includes(gState)) return;
   if(gState==='WAVEWON'){
     waveWonTimer-=dt;
     if(waveWonTimer<=0){
-      if(gWave>5){gState='VICTORY';sfx.win();}
-      else{spawnWave(gWave);gState='PLAYING';updateHUD();sfx.wave();}
+      hintPending=false; spawnWave(gWave); gState='PLAYING'; updateHUD(); sfx.wave(); cmdEl.focus();
     }
     updateParticles(dt); return;
   }
@@ -390,7 +560,12 @@ function update(dt){
         const pts=Math.round(e.t*10*diff.scoreMulti); gScore+=pts;
         explode(l.tx,l.ty,TC[e.t]); sfx.kill(); updateHUD();
         showMsg(`+${pts}  ${e.c} — ${e.h}`,'#00ff88',1800);
-        if(enemies.every(en=>!en.alive)){gWave++;waveWonTimer=2.8;gState='WAVEWON';updateHUD();sfx.wave();}
+        if(enemies.every(en=>!en.alive)){
+          gWave++;
+          waveWonTimer = (gWave-1)===10 ? 4.5 : 2.8;  // linger on wave 10 milestone
+          hintPending=false; gState='WAVEWON'; updateHUD();
+          if((gWave-1)===10) sfx.win(); else sfx.wave();
+        }
       }
     }
   }
@@ -422,9 +597,14 @@ function updateParticles(dt){
 }
 
 function loseLife(msg){
+  hintPending=false;
   gLives--;shakeTimer=.55;updateHUD();sfx.bomb();showMsg(msg,'#ff5555');
   if(gLives<=0){gState='GAMEOVER';sfx.over();}
-  else spawnWave(gWave);
+  else spawnWave(gWave, true);  // respawn — reuse same picks, don't burn pool
+}
+
+function setHintBtn(visible){
+  document.getElementById('hint-btn').classList.toggle('vis', visible);
 }
 
 // ── After game ends ───────────────────────────────────────────────────────────
@@ -534,14 +714,25 @@ function drawHintConfirm(){
   if(gLives<=1)
     glowText('⚠  WARNING: only 1 life remaining!',W/2,278,'#ff5577','bold 12px Arial,sans-serif',0);
   glowText('[Y / ENTER]  Confirm',W/2,320,'#ffcc44','bold 13px "Courier New",monospace',4);
-  glowText('[N / ESC]  Cancel',W/2,342,'#666633','13px "Courier New",monospace',0);
+  glowText('[N / ESC / click away]  Cancel',W/2,342,'#666633','13px "Courier New",monospace',0);
 }
 
 function drawWaveWon(){
-  ctx.fillStyle='rgba(2,8,4,.78)'; ctx.fillRect(0,0,W,H);
-  glowText(`WAVE ${gWave-1} CLEARED`,W/2,H/2-28,'#00ff88','bold 30px "Courier New",monospace',18);
-  glowText(gWave>5?'PREPARING FINAL REPORT…':`INITIATING WAVE ${gWave}…`,W/2,H/2+14,'#2d9c5a','15px "Courier New",monospace',4);
-  glowText(`SCORE: ${gScore}`,W/2,H/2+46,'#1a6a1a','13px "Courier New",monospace',0);
+  const cleared = gWave-1;
+  const milestone = cleared===10;
+  ctx.fillStyle=milestone?'rgba(0,6,2,.92)':'rgba(2,8,4,.78)'; ctx.fillRect(0,0,W,H);
+  if(milestone){
+    glowText('WAVE 10 MILESTONE!',W/2,H/2-70,'#ffcc00','bold 34px "Courier New",monospace',22);
+    glowText('Two-row invasion begins. Good luck.',W/2,H/2-22,'#aa8800','14px "Courier New",monospace',4);
+    glowText(`SCORE: ${gScore}`,W/2,H/2+18,'#00ff88','bold 18px "Courier New",monospace',8);
+    glowText('INITIATING WAVE 11…',W/2,H/2+58,'#2d9c5a','14px "Courier New",monospace',0);
+  } else {
+    const twoRows = cleared>=6;
+    glowText(`WAVE ${cleared} CLEARED`,W/2,H/2-28,'#00ff88','bold 30px "Courier New",monospace',18);
+    glowText(twoRows?`DUAL FORMATION — WAVE ${gWave}…`:`INITIATING WAVE ${gWave}…`,
+      W/2,H/2+14,'#2d9c5a','15px "Courier New",monospace',4);
+    glowText(`SCORE: ${gScore}`,W/2,H/2+46,'#1a6a1a','13px "Courier New",monospace',0);
+  }
 }
 
 function drawGameOver(){
@@ -654,14 +845,16 @@ function loop(ts){
 function startGame(dn){
   diff=DIFF[dn]; diffName=dn;
   gScore=0; gLives=3; gWave=1; hintPending=false;
-  wavePool=shuffle(POOL); wavePoolIdx=0;
+  initTPools(); currentWavePicks=[];
   spawnWave(1); gState='PLAYING';
   titleEl.classList.add('hidden');
+  setHintBtn(true);
   updateHUD(); sfx.wave(); cmdEl.focus(); mbEl.textContent='';
 }
 function backToTitle(){
   gState='TITLE'; hintPending=false;
   titleEl.classList.remove('hidden');
+  setHintBtn(false);
   mbEl.textContent='';
 }
 
@@ -672,9 +865,10 @@ function backToTitle(){
 
 // ── Input: cmd box ────────────────────────────────────────────────────────────
 cmdEl.addEventListener('keydown', e=>{
-  if(e.ctrlKey && e.key.toLowerCase()==='h'){
+  if(e.key==='Escape'){
     e.preventDefault();
-    if(gState==='PLAYING' && !hintPending){ hintPending=true; cmdEl.blur(); }
+    if(gState==='PLAYING'&&!hintPending){ hintPending=true; cmdEl.blur(); }
+    else if(hintPending){ hintPending=false; cmdEl.focus(); }
     return;
   }
   if(e.key!=='Enter') return;
@@ -689,46 +883,49 @@ cmdEl.addEventListener('keydown', e=>{
 document.addEventListener('keydown', e=>{
   if(hintPending){
     e.preventDefault();
-    if(e.key==='y'||e.key==='Y'||e.key==='Enter'){ hintPending=false; useHint(); cmdEl.focus(); }
-    else if(e.key==='n'||e.key==='N'||e.key==='Escape'){ hintPending=false; cmdEl.focus(); }
+    if(e.key==='y'||e.key==='Y'||e.key==='Enter'){ useHint(); }
+    else if(e.key==='Escape'||e.key==='n'||e.key==='N'){ hintPending=false; cmdEl.focus(); }
+    return;
+  }
+  if(gState==='GAMEOVER'){
+    if(e.key==='Enter') proceedAfterGame();
+    return;
+  }
+  if(gState==='HIGHSCORES'){
+    if(e.key==='Enter'||e.key===' ') backToTitle();
     return;
   }
   if(gState==='INITIALS'){
     e.preventDefault();
-    const k=e.key.toUpperCase();
-    if(/^[A-Z0-9]$/.test(k)&&initPos<3){ initLetters[initPos]=k; initPos++; }
-    else if(e.key==='Backspace'&&initPos>0){ initPos--; initLetters[initPos]=''; }
-    else if(e.key==='Enter'&&initPos===3){
-      submitScore(initLetters.join(''),initScore,initWave,diffName);
+    if(e.key==='ArrowLeft'&&initPos>0) initPos--;
+    else if(e.key==='ArrowRight'&&initPos<2) initPos++;
+    else if(e.key==='Backspace'){ initLetters[initPos]=''; if(initPos>0) initPos--; }
+    else if(e.key.length===1&&/[a-zA-Z0-9]/.test(e.key)){
+      initLetters[initPos]=e.key.toUpperCase();
+      if(initPos<2) initPos++;
+    } else if(e.key==='Enter'){
+      const init=initLetters.join('').padEnd(3,'?');
+      submitScore(init, initScore, initWave, diffName);
       gState='HIGHSCORES';
     }
     return;
   }
-  if(gState==='HIGHSCORES'&&e.key==='Enter'){ e.preventDefault(); backToTitle(); return; }
-  if((gState==='GAMEOVER'||gState==='VICTORY')&&e.key==='Enter'){ e.preventDefault(); proceedAfterGame(); return; }
-  if(gState==='PLAYING'&&document.activeElement!==cmdEl) cmdEl.focus();
 });
 
-// Capture Ctrl+H even when cmd not focused
-document.addEventListener('keydown', e=>{
-  if(e.ctrlKey&&e.key.toLowerCase()==='h'&&gState==='PLAYING'&&!hintPending){
-    e.preventDefault(); hintPending=true; cmdEl.blur();
-  }
-},{capture:true});
-
-cmdEl.addEventListener('input',()=>{
-  const t=cmdEl.value.trim().toLowerCase();
-  for(const e of enemies) e.targeted=e.alive&&e.c===t;
-});
-
-C.addEventListener('click',()=>{
-  initAu();
-  if(gState==='GAMEOVER'||gState==='VICTORY') proceedAfterGame();
-  else if(gState==='HIGHSCORES') backToTitle();
-  else if(gState==='PLAYING'&&!hintPending) cmdEl.focus();
+// ── Hint button ───────────────────────────────────────────────────────────────
+document.getElementById('hint-btn').addEventListener('click',()=>{
+  if(gState==='PLAYING'&&!hintPending){ hintPending=true; cmdEl.blur(); }
+  else if(hintPending){ hintPending=false; cmdEl.focus(); }
 });
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
+refreshTitleScores();
+loop();
+})();
+</script>
+</body>
+</html>
+�� Boot ──────────────────────────────────────────────────────────────────────
 refreshTitleScores();
 updateHUD();
 requestAnimationFrame(loop);
