@@ -1179,6 +1179,232 @@ const QUESTIONS = [
   { cat:'files', q:'Which commands can download files from the web?', choices:['Only wget','Only curl','Both curl and wget','ftp'], correct:'Both curl and wget' },
   { cat:'files', q:'Which command compresses a file using gzip?', choices:['tar','unzip','gzip','compact'], correct:'gzip' },
   { cat:'files', q:'Which command extracts a ZIP archive?', choices:['unzip','zip','gunzip','tar'], correct:'unzip' },
+
+  // ── New commands added from Terminal Invaders pool ──
+
+  // atop
+  { cat:'services', q:'Which command provides a detailed real-time view of system resources including disk and network per process?', choices:['atop','top','htop','iotop'], correct:'atop' },
+  { cat:'services', q:'What makes <code>atop</code> different from <code>top</code>?', choices:['atop shows only CPU','atop logs historical data and shows disk/network per process','atop is faster','atop only works on Red Hat'], correct:'atop logs historical data and shows disk/network per process' },
+
+  // blkid
+  { cat:'files', q:'Which command displays the UUID and filesystem type of block devices?', choices:['blkid','lsblk','fdisk -l','mount'], correct:'blkid' },
+  { cat:'files', q:'Why would you use <code>blkid</code>?', choices:['To format a drive','To find a partition\'s UUID for /etc/fstab','To list running processes','To check disk space'], correct:'To find a partition\'s UUID for /etc/fstab' },
+
+  // brew
+  { cat:'packages', q:'Which package manager is commonly used on macOS and also available on Linux?', choices:['brew','snap','flatpak','yum'], correct:'brew' },
+  { cat:'packages', q:'What command installs a package using Homebrew?', choices:['brew add','brew install','brew get','brew pkg'], correct:'brew install' },
+
+  // bzip2
+  { cat:'files', q:'Which command compresses a file using the bzip2 algorithm?', choices:['gzip','bzip2','zip','xz'], correct:'bzip2' },
+  { cat:'files', q:'What file extension does <code>bzip2</code> produce?', choices:['.gz','.bz','.bz2','.xz'], correct:'.bz2' },
+
+  // chpasswd
+  { cat:'users', q:'Which command allows you to update passwords for multiple users in bulk from a file?', choices:['passwd -b','chpasswd','usermod -p','passmgr'], correct:'chpasswd' },
+  { cat:'users', q:'What is the typical input format for <code>chpasswd</code>?', choices:['username password','username:password','password username','user=password'], correct:'username:password' },
+
+  // chroot
+  { cat:'security', q:'Which command runs a command or shell inside a different root directory?', choices:['chroot','jailsh','pivot_root','isolate'], correct:'chroot' },
+  { cat:'security', q:'What is a common use case for <code>chroot</code>?', choices:['Changing file ownership','Recovering a broken system by mounting and chrooting into it','Compressing files','Listing block devices'], correct:'Recovering a broken system by mounting and chrooting into it' },
+
+  // dd
+  { cat:'files', q:'Which command copies and converts data at the block level, often used to clone drives?', choices:['cp','rsync','dd','tar'], correct:'dd' },
+  { cat:'files', q:'What does <code>dd if=/dev/sda of=disk.img</code> do?', choices:['Formats /dev/sda','Creates a raw image of /dev/sda','Mounts /dev/sda','Deletes /dev/sda'], correct:'Creates a raw image of /dev/sda' },
+
+  // dig
+  { cat:'network', q:'Which command queries DNS servers for detailed information about a domain?', choices:['nslookup','host','dig','whois'], correct:'dig' },
+  { cat:'network', q:'Which command provides the most detailed DNS query output?', choices:['ping','host','nslookup','dig'], correct:'dig' },
+
+  // dmesg
+  { cat:'services', q:'Which command displays kernel ring buffer messages, useful for diagnosing hardware issues?', choices:['journalctl','dmesg','syslog','logwatch'], correct:'dmesg' },
+  { cat:'services', q:'When would you use <code>dmesg</code>?', choices:['To view user login history','To see kernel and hardware messages at boot','To list running services','To check disk space'], correct:'To see kernel and hardware messages at boot' },
+
+  // dnf
+  { cat:'packages', q:'Which package manager replaced <code>yum</code> as the default on Fedora and RHEL 8+?', choices:['rpm','dnf','apt','pacman'], correct:'dnf' },
+  { cat:'packages', q:'Which command installs a package using DNF?', choices:['dnf add','dnf get','dnf install','dnf pkg'], correct:'dnf install' },
+
+  // dstat
+  { cat:'services', q:'Which command shows a live, combined view of CPU, disk, network, and memory statistics?', choices:['vmstat','iostat','dstat','sar'], correct:'dstat' },
+  { cat:'services', q:'What is an advantage of <code>dstat</code> over <code>vmstat</code>?', choices:['dstat is older','dstat combines CPU, disk, and network in one colorized view','dstat only shows memory','dstat requires root'], correct:'dstat combines CPU, disk, and network in one colorized view' },
+
+  // fg
+  { cat:'files', q:'Which command brings a background job to the foreground?', choices:['bg','jobs','fg','resume'], correct:'fg' },
+  { cat:'files', q:'Which pair of commands lets you suspend a job and resume it in the background?', choices:['stop / go','Ctrl+Z then bg','pause / bg','Ctrl+C then fg'], correct:'Ctrl+Z then bg' },
+
+  // flatpak
+  { cat:'packages', q:'Which package format runs applications in a sandboxed container, independent of the distro?', choices:['snap','flatpak','appimage','deb'], correct:'flatpak' },
+  { cat:'packages', q:'Which command installs a Flatpak application?', choices:['flatpak add','flatpak get','flatpak install','flatpak run'], correct:'flatpak install' },
+
+  // fsck
+  { cat:'files', q:'Which command checks and repairs a Linux filesystem?', choices:['fsck','repair','mkfs','tune2fs'], correct:'fsck' },
+  { cat:'files', q:'When should you run <code>fsck</code>?', choices:['While the filesystem is mounted and in use','Only on unmounted filesystems','Any time during normal operation','After every reboot'], correct:'Only on unmounted filesystems' },
+
+  // gpasswd
+  { cat:'users', q:'Which command administers <code>/etc/group</code> — setting group passwords and managing members?', choices:['groupmod','gpasswd','passwd -g','groupadmin'], correct:'gpasswd' },
+  { cat:'users', q:'What does <code>gpasswd -a alice developers</code> do?', choices:['Removes alice from developers','Adds alice to the developers group','Creates the developers group','Sets alice\'s password'], correct:'Adds alice to the developers group' },
+
+  // groupadd
+  { cat:'users', q:'Which command creates a new group on the system?', choices:['useradd -g','groupadd','addgroup --new','mkgroup'], correct:'groupadd' },
+  { cat:'users', q:'Which command would you use to create a group called <code>devs</code>?', choices:['usermod -G devs','groupadd devs','addgroup devs','newgroup devs'], correct:'groupadd devs' },
+
+  // groupdel
+  { cat:'users', q:'Which command deletes an existing group from the system?', choices:['groupmod -d','userdel -g','groupdel','rmgroup'], correct:'groupdel' },
+  { cat:'users', q:'What happens to files owned by a group after <code>groupdel</code>?', choices:['They are deleted','They retain the old GID with no group name','They become root-owned','They are moved to /lost+found'], correct:'They retain the old GID with no group name' },
+
+  // groupmod
+  { cat:'users', q:'Which command modifies an existing group\'s name or GID?', choices:['groupadd','gpasswd','groupmod','usermod'], correct:'groupmod' },
+  { cat:'users', q:'What does <code>groupmod -n newname oldname</code> do?', choices:['Deletes the old group','Renames the group from oldname to newname','Adds a user to the group','Changes the GID'], correct:'Renames the group from oldname to newname' },
+
+  // htop
+  { cat:'services', q:'Which command provides an interactive, color-coded process viewer with mouse support?', choices:['top','atop','htop','ps aux'], correct:'htop' },
+  { cat:'services', q:'What is an advantage of <code>htop</code> over <code>top</code>?', choices:['htop uses less memory','htop allows scrolling, mouse clicks, and easier process killing','htop shows more processes','htop logs to a file'], correct:'htop allows scrolling, mouse clicks, and easier process killing' },
+
+  // iftop
+  { cat:'network', q:'Which command displays real-time network bandwidth usage by connection?', choices:['nethogs','iftop','netstat','ss'], correct:'iftop' },
+  { cat:'network', q:'What does <code>iftop</code> monitor?', choices:['File transfers','Network bandwidth per connection in real time','Running processes','Disk I/O'], correct:'Network bandwidth per connection in real time' },
+
+  // iostat
+  { cat:'services', q:'Which command reports CPU and disk I/O statistics?', choices:['vmstat','iotop','iostat','dstat'], correct:'iostat' },
+  { cat:'services', q:'What package provides the <code>iostat</code> command?', choices:['procps','net-tools','sysstat','util-linux'], correct:'sysstat' },
+
+  // iotop
+  { cat:'services', q:'Which command shows real-time disk I/O usage per process?', choices:['iostat','iotop','dstat','atop'], correct:'iotop' },
+  { cat:'services', q:'What would you use <code>iotop</code> to identify?', choices:['Which process is using the most CPU','Which process is causing heavy disk I/O','Active network connections','Memory leaks'], correct:'Which process is causing heavy disk I/O' },
+
+  // killall
+  { cat:'services', q:'Which command sends a signal to all processes matching a given name?', choices:['pkill','kill -9','killall','killname'], correct:'killall' },
+  { cat:'services', q:'What does <code>killall firefox</code> do?', choices:['Kills the process with PID "firefox"','Terminates all processes named firefox','Pauses firefox','Restarts firefox'], correct:'Terminates all processes named firefox' },
+
+  // ln
+  { cat:'files', q:'Which command creates a symbolic (soft) link to a file?', choices:['link','ln -s','symlink','cp -l'], correct:'ln -s' },
+  { cat:'files', q:'What is the difference between a hard link and a soft link?', choices:['No difference','A soft link points to a path; a hard link points to the inode directly','A hard link works across filesystems','A soft link cannot be deleted'], correct:'A soft link points to a path; a hard link points to the inode directly' },
+
+  // lspci
+  { cat:'services', q:'Which command lists all PCI devices connected to the system?', choices:['lsusb','lspci','lshw','hwinfo'], correct:'lspci' },
+  { cat:'services', q:'When would you use <code>lspci</code>?', choices:['To list USB devices','To identify network cards, GPUs, and other PCI hardware','To show open files','To display partition info'], correct:'To identify network cards, GPUs, and other PCI hardware' },
+
+  // lsusb
+  { cat:'services', q:'Which command lists USB devices currently connected to the system?', choices:['lspci','lsusb','usb-devices','hwdetect'], correct:'lsusb' },
+  { cat:'services', q:'What information does <code>lsusb</code> display?', choices:['Disk partitions','USB bus, device number, vendor, and product ID','Running processes','Network interfaces'], correct:'USB bus, device number, vendor, and product ID' },
+
+  // mtr
+  { cat:'network', q:'Which command combines the functions of <code>ping</code> and <code>traceroute</code> in real time?', choices:['netstat','nmap','mtr','dig'], correct:'mtr' },
+  { cat:'network', q:'What does <code>mtr</code> stand for?', choices:['Multi-Threaded Router','My TraceRoute','Master Terminal Router','Multi-Trace Reporter'], correct:'My TraceRoute' },
+
+  // nc
+  { cat:'network', q:'Which command is known as the "Swiss Army knife" of networking, used for reading and writing raw network connections?', choices:['nmap','netcat (nc)','curl','ssh'], correct:'netcat (nc)' },
+  { cat:'network', q:'Which command can be used to test if a port is open on a remote host?', choices:['ping','nc','ifconfig','route'], correct:'nc' },
+
+  // ncdu
+  { cat:'files', q:'Which command provides an interactive, ncurses-based disk usage analyzer?', choices:['du','df','ncdu','duf'], correct:'ncdu' },
+  { cat:'files', q:'What is the advantage of <code>ncdu</code> over <code>du</code>?', choices:['ncdu is faster','ncdu provides an interactive browser to find large files','ncdu shows network usage','ncdu works without root'], correct:'ncdu provides an interactive browser to find large files' },
+
+  // nethogs
+  { cat:'network', q:'Which command shows real-time network bandwidth usage broken down by process?', choices:['iftop','nethogs','netstat','nload'], correct:'nethogs' },
+  { cat:'network', q:'What makes <code>nethogs</code> different from <code>iftop</code>?', choices:['nethogs shows per-connection stats','nethogs groups traffic by process','nethogs only monitors UDP','nethogs requires a GUI'], correct:'nethogs groups traffic by process' },
+
+  // nice
+  { cat:'services', q:'Which command starts a process with a modified scheduling priority?', choices:['renice','priority','nice','sched'], correct:'nice' },
+  { cat:'services', q:'What is the range of nice values on Linux?', choices:['-10 to 10','0 to 100','-20 to 19','1 to 99'], correct:'-20 to 19' },
+
+  // nmap
+  { cat:'network', q:'Which command scans a host or network for open ports and services?', choices:['netstat','nmap','ss','dig'], correct:'nmap' },
+  { cat:'security', q:'Why should <code>nmap</code> only be used on networks you own or have permission to scan?', choices:['It is slow','Unauthorized scanning is illegal and considered an attack','It requires root always','It only works on Linux'], correct:'Unauthorized scanning is illegal and considered an attack' },
+
+  // nmcli
+  { cat:'network', q:'Which command-line tool manages NetworkManager connections?', choices:['ifconfig','ip','nmcli','netctl'], correct:'nmcli' },
+  { cat:'network', q:'What does <code>nmcli device status</code> show?', choices:['Open ports','The status of all network interfaces managed by NetworkManager','Running processes','DNS records'], correct:'The status of all network interfaces managed by NetworkManager' },
+
+  // nohup
+  { cat:'services', q:'Which command runs a process that continues after you log out?', choices:['bg','disown','nohup','screen'], correct:'nohup' },
+  { cat:'services', q:'What file does <code>nohup</code> redirect output to by default?', choices:['nohup.out','stdout.log','output.txt','nohup.log'], correct:'nohup.out' },
+
+  // nslookup
+  { cat:'network', q:'Which command queries DNS to look up a hostname or IP address interactively?', choices:['dig','host','nslookup','whois'], correct:'nslookup' },
+  { cat:'network', q:'What does <code>nslookup google.com</code> return?', choices:['Open ports on google.com','The IP addresses associated with google.com','The WHOIS record','The traceroute path'], correct:'The IP addresses associated with google.com' },
+
+  // pacman
+  { cat:'packages', q:'Which package manager is used on Arch Linux?', choices:['apt','yum','pacman','dnf'], correct:'pacman' },
+  { cat:'packages', q:'Which command installs a package using pacman?', choices:['pacman -S','pacman -i','pacman -U','pacman install'], correct:'pacman -S' },
+
+  // parted
+  { cat:'files', q:'Which command is a more advanced alternative to <code>fdisk</code> that supports GPT partitions?', choices:['fdisk','mkfs','parted','blkid'], correct:'parted' },
+  { cat:'files', q:'What is an advantage of <code>parted</code> over <code>fdisk</code>?', choices:['parted is older','parted supports GPT and disks larger than 2TB','parted is faster','parted requires no root'], correct:'parted supports GPT and disks larger than 2TB' },
+
+  // pstree
+  { cat:'services', q:'Which command displays running processes in a tree structure showing parent-child relationships?', choices:['ps aux','top','pstree','htop'], correct:'pstree' },
+  { cat:'services', q:'What information does <code>pstree</code> make easier to see than <code>ps</code>?', choices:['CPU usage','Which processes spawned which child processes','Network usage','Disk I/O'], correct:'Which processes spawned which child processes' },
+
+  // renice
+  { cat:'services', q:'Which command changes the priority of an already-running process?', choices:['nice','renice','priority','sched'], correct:'renice' },
+  { cat:'services', q:'What does <code>renice -n -5 -p 1234</code> do?', choices:['Kills PID 1234','Increases priority of PID 1234 (lower nice value)','Pauses PID 1234','Restarts PID 1234'], correct:'Increases priority of PID 1234 (lower nice value)' },
+
+  // rpm
+  { cat:'packages', q:'Which command manages RPM packages on Red Hat-based systems?', choices:['dpkg','rpm','apt','pkg'], correct:'rpm' },
+  { cat:'packages', q:'Which command installs an RPM package file?', choices:['rpm -i','rpm -S','rpm -q','rpm add'], correct:'rpm -i' },
+
+  // sar
+  { cat:'services', q:'Which command collects, reports, and saves system activity data over time?', choices:['vmstat','iostat','sar','dstat'], correct:'sar' },
+  { cat:'services', q:'What package provides the <code>sar</code> command?', choices:['procps','net-tools','sysstat','util-linux'], correct:'sysstat' },
+
+  // sleep
+  { cat:'files', q:'Which command pauses execution for a specified number of seconds?', choices:['wait','pause','sleep','delay'], correct:'sleep' },
+  { cat:'files', q:'What does <code>sleep 5 && echo done</code> do?', choices:['Sleeps forever','Waits 5 seconds then prints "done"','Prints done 5 times','Errors immediately'], correct:'Waits 5 seconds then prints "done"' },
+
+  // snap
+  { cat:'packages', q:'Which package format bundles an application with all its dependencies in a single container?', choices:['deb','rpm','snap','tar.gz'], correct:'snap' },
+  { cat:'packages', q:'Which command installs a snap package?', choices:['snap add','snap get','snap install','snap run'], correct:'snap install' },
+
+  // strace
+  { cat:'services', q:'Which command traces the system calls made by a running process?', choices:['ltrace','dtrace','strace','ptrace'], correct:'strace' },
+  { cat:'services', q:'What is a common use of <code>strace</code>?', choices:['Monitoring network traffic','Debugging why a program is failing by seeing its system calls','Listing open files','Checking CPU usage'], correct:'Debugging why a program is failing by seeing its system calls' },
+
+  // swapoff / swapon
+  { cat:'files', q:'Which command disables a swap partition or file?', choices:['swapon','swapoff','umount','fstab'], correct:'swapoff' },
+  { cat:'files', q:'Which command enables a swap partition or file?', choices:['swapoff','mkswap','swapon','mount -s'], correct:'swapon' },
+
+  // tac
+  { cat:'files', q:'Which command displays the contents of a file in reverse line order?', choices:['rev','tail -r','tac','cat -r'], correct:'tac' },
+  { cat:'files', q:'What is <code>tac</code> in relation to <code>cat</code>?', choices:['A compression tool','cat spelled backwards — it reverses line order','A faster version of cat','A pager like less'], correct:'cat spelled backwards — it reverses line order' },
+
+  // tmux
+  { cat:'services', q:'Which terminal multiplexer lets you run multiple sessions in one terminal window and detach/reattach them?', choices:['screen','tmux','nohup','bg'], correct:'tmux' },
+  { cat:'services', q:'What is the main advantage of <code>tmux</code> over simply running a command in the background?', choices:['tmux is faster','Sessions persist and can be reattached even after disconnecting','tmux uses less memory','tmux does not require root'], correct:'Sessions persist and can be reattached even after disconnecting' },
+
+  // traceroute
+  { cat:'network', q:'Which command shows the path packets take to reach a destination host?', choices:['ping','mtr','traceroute','netstat'], correct:'traceroute' },
+  { cat:'network', q:'What does each line in <code>traceroute</code> output represent?', choices:['An open port','A hop (router) along the path to the destination','A DNS record','A network interface'], correct:'A hop (router) along the path to the destination' },
+
+  // tune2fs
+  { cat:'files', q:'Which command adjusts tunable filesystem parameters on an ext2/3/4 filesystem?', choices:['fsck','mkfs','tune2fs','e2fsck'], correct:'tune2fs' },
+  { cat:'files', q:'What does <code>tune2fs -l /dev/sda1</code> do?', choices:['Formats the partition','Lists the filesystem parameters and superblock info','Repairs the filesystem','Mounts the partition'], correct:'Lists the filesystem parameters and superblock info' },
+
+  // umask
+  { cat:'permissions', q:'Which command sets the default permission mask for newly created files and directories?', choices:['chmod','umask','setperm','defaultmod'], correct:'umask' },
+  { cat:'permissions', q:'If <code>umask</code> is 022, what permissions does a new file get (assuming base 666)?', choices:['777','666','644','600'], correct:'644' },
+
+  // vmstat
+  { cat:'services', q:'Which command reports statistics about processes, memory, paging, I/O, and CPU activity?', choices:['iostat','free','vmstat','sar'], correct:'vmstat' },
+  { cat:'services', q:'What does <code>vmstat 1 5</code> do?', choices:['Shows 1 snapshot and exits','Runs vmstat every 1 second for 5 iterations','Shows 5 seconds of history','Monitors 5 virtual machines'], correct:'Runs vmstat every 1 second for 5 iterations' },
+
+  // w
+  { cat:'users', q:'Which command shows who is logged in and what they are doing?', choices:['who','w','last','users'], correct:'w' },
+  { cat:'users', q:'What additional information does <code>w</code> show compared to <code>who</code>?', choices:['Group membership','The current command each user is running and load averages','Password expiry','Sudo access'], correct:'The current command each user is running and load averages' },
+
+  // watch
+  { cat:'files', q:'Which command repeatedly runs another command at a set interval and displays the output?', choices:['repeat','cron','watch','loop'], correct:'watch' },
+  { cat:'files', q:'What does <code>watch -n 2 df -h</code> do?', choices:['Runs df -h once','Runs df -h every 2 seconds','Watches a file for changes','Sets an alarm after 2 seconds'], correct:'Runs df -h every 2 seconds' },
+
+  // whois
+  { cat:'network', q:'Which command queries registration information for a domain name or IP address?', choices:['dig','nslookup','whois','host'], correct:'whois' },
+  { cat:'network', q:'What type of information does <code>whois</code> return?', choices:['Open ports','DNS records','Domain registrant, registrar, and expiry info','Routing path'], correct:'Domain registrant, registrar, and expiry info' },
+
+  // xargs
+  { cat:'files', q:'Which command builds and executes commands using input from standard input (often piped)?', choices:['pipe','exec','xargs','apply'], correct:'xargs' },
+  { cat:'files', q:'What does <code>find . -name "*.tmp" | xargs rm</code> do?', choices:['Lists .tmp files','Moves .tmp files','Deletes all .tmp files found by find','Creates .tmp files'], correct:'Deletes all .tmp files found by find' },
+
+  // yum
+  { cat:'packages', q:'Which package manager is used on older Red Hat, CentOS, and Fedora systems?', choices:['apt','yum','pacman','zypper'], correct:'yum' },
+  { cat:'packages', q:'Which command installs a package using yum?', choices:['yum add','yum get','yum install','yum pkg'], correct:'yum install' },
 ];
 
 const CAT_LABELS = {
